@@ -1,12 +1,10 @@
 min' :: [Int] -> Int
 min' [] = 0
 min' [v] = v
-min' values = if first < second then do
-                  let others = drop 1 (tail values) in
-                      min' (first:others)
-              else min' (tail values)
-              where first = head values
-                    second = values !! 1
+min' (a:b) = if a < head rest
+             then min' (a:tail rest)
+             else min' rest
+             where rest = tail (a:b)
 
 
 main = do

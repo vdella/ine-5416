@@ -14,18 +14,19 @@ vertically or diagonally._
 ex:
 
 2|2 4
-1|3 5 -> **Bad game**, as we have two 2's at the first row and
-4 5|1    two 5's next to one another at the bottom-right.
 
->> So, how regions are made (or chosen)?
+1|3 5 -> **Bad game**, as we have two 2's at the first row and two 5's next to one another at the bottom-right.
+
+4 5|1     
+
+> So, how regions are made (or chosen)?
+
 Ramdonly. In order to solve that problem, as we are dealing with
 code, we must pass each region's coordinate inside the file to
 be parsed. 
 
-ex: 0 1
-    0 2
-    0 3     x x x
-    1 0  -> - - -  (2 x 3 grid)
-    1 1     y y y
-    1 2
-    1 3
+ex: (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3)     
+    
+    x x x
+    -----
+    y y y

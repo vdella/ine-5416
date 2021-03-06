@@ -45,12 +45,11 @@ getRowPossibles ((Initial y r):xs) possibles reg = getRowPossibles xs possibles 
 getRowPossibles ((Possible ys r):xs) possibles reg | r == reg = getRowPossibles xs (possibles ++ [Possible ys r]) reg
                                                   | otherwise = getRowPossibles xs possibles reg
 
-{-- dado uma regiao, o tabuleiro e uma lista para armazenar os valores, retorna os valores iniciais desta regiao --}
+{-- dado uma regiao, o tabuleiro e uma lista para armazenar os valores, retorna os valores possiveis desta regiao --}
 getRegionPossibles :: Int -> Board -> [Cell] -> [Cell]
 getRegionPossibles _ []  possibles = possibles
 getRegionPossibles r (x:xs) possibles = getRowPossibles x possibles r ++ getRegionPossibles r xs possibles 
 
-{-- dado um valor e uma regiao, remove o valor das celulas do tipo Possible --}
 
 {-- 
 removeItem _ []                 = []
@@ -70,7 +69,6 @@ main = do
   s <- readFile "sudoku.txt"
   let board = readBoard s [] []
   print . show $ board
-  putStrLn "Linhas adjacentes a linha 2"
   print (show (adjecentRows board 2 3))
   putStrLn "Initials"
   print (show (getRegionInitials 1 board []))

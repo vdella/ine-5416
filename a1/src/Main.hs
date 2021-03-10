@@ -11,9 +11,15 @@ main :: IO ()
 main = do
   --s <- readFile "suguru_board.txt"
   s <- readFile "sudoku.txt"
-  print s
   let board = readBoard' s 
   print (show board)
+  print (show (getUniqueRegions' board))
+  putStrLn "-----"
+  -- print (show (board!!0))
+  -- let regionInitials = getRegionInitials 2 board []
+  -- let regionInitialsValues = getInitialsValues regionInitials []
+  -- print (trimBoard regionInitialsValues 2 board [])
+  print (valueInRegion board 1 2)
   -- print . show $ board
   -- putStrLn "Linhas adjacentes a linha 2"
   -- print (show (adjecentRows board 2 3))

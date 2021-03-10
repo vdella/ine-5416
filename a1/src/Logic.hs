@@ -5,7 +5,7 @@ import Types
 {-- dado o tabuleiro, indice e max de linhas, devolve as linhas adjacentes  a linha indice --}
 adjecentRows :: Board -> Int -> Int -> [Row]
 adjecentRows board i max | i == 0 = [board!!1]
-                         | i == max = [board!!(i-2)]
+                         | i == max = [board!!(i-2)]  -- !!!TODO: why -2? Why not -1?
                          | i >= max = []
                          | otherwise = [board!!(i-2) ++ board!!i]
 
@@ -56,5 +56,6 @@ removeItem x (y:ys) | x == y    = removeItem x ys
 
 contains :: [Int] -> Int -> Bool
 contains [] _ = False
-contains (x:xs) i | x == i = True
-                  | otherwise = contains xs i
+contains (x:xs) i 
+    | x == i = True
+    | otherwise = contains xs i

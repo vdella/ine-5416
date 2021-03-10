@@ -2,7 +2,6 @@ module Parsing where
 
 import qualified Data.Char
 import Types ( Board, Cell(Initial, Possible), Row )
-import Control.Monad ( when )
 import Data.Map (Map)
 import qualified Data.Map as Map
 
@@ -21,20 +20,26 @@ readBoard (x:xs) list board {-- Nao temos mais o que ler, adiciona linha ao tabu
 {-- Reads the file in search of region strings to start its building.
     As the return, gives a Map, which takes the region number (an Integer) as the key
     and the region's coordinates as the value.
-    
-    NOTE: coordinates are given according to cartesian maps. In that way,
-    the map values are lists of tuples (x, y). --}
+
+    !!!FIXME: LAST REGION NOT PUT INSIDE THE MAP. ONLY GETS THE PREVIOUS REGIONS, NOT THE LAST.
+--}
 readRegions :: Int -> [Int] -> [String] -> Map Int [Int] -> Map Int [Int]
-readRegions _ _ [] filledMap = filledMap
+readRegions _ _ [] filledMap = filledMap  -- Being with empty [String], gives a new map back.
 readRegions regionNumber elements (x : xs) mapToBeFilled =
-    if x == "region" then
+    if x == "region" then 
       if regionNumber /= 0 then do
-        let fillingMap = Map.insert regionNumber (tail elements) mapToBeFilled in
-          readRegions (regionNumber + 1) [] xs fillingMap
-      else readRegions (regionNumber + 1) [] xs mapToBeFilled
+
+        -- We have to insert the list of numbers of a given region inside the map right
+        -- at the last second: when we are about to start parsing some other new region!
+
+        let fillingMap = Map.insert regionNumber (tail elements) mapToBeFilled in  -- Use "tail elements" to evade using the proper region number
+          readRegions (regionNumber + 1) [] xs fillingMap                          -- such as "region 1". We want only what comes after that.
+
+      else readRegions (regionNumber + 1) [] xs mapToBeFilled  -- Increment region index and go on!
+    -- Append found number to list and parse the rest, then.
     else readRegions regionNumber (elements ++ [actualNumber]) xs mapToBeFilled where actualNumber = read x :: Int
 
-readRegions' :: String -> Map Int [Int]
+readRegions' :: String -> Map Int [Int]  -- Used during execution. Hides interns underneath.
 readRegions' string' = readRegions 0 [] allElements filledMap
   where filledMap = Map.empty
         allElements = words string'

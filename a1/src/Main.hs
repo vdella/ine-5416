@@ -9,9 +9,11 @@ import qualified Data.Map as Map
 
 main :: IO ()
 main = do
-  s <- readFile "suguru_board.txt"
-  -- print s
-  -- let board = readBoard' s 
+  --s <- readFile "suguru_board.txt"
+  s <- readFile "sudoku.txt"
+  print s
+  let board = readBoard' s 
+  print (show board)
   -- print . show $ board
   -- putStrLn "Linhas adjacentes a linha 2"
   -- print (show (adjecentRows board 2 3))
@@ -21,6 +23,6 @@ main = do
   -- print (show (getRegionPossibles 1 board []))
 
   -- print s
-  print (words s)
-  let newMap = readRegions' s
-  print newMap
+  -- print (words s)
+  -- let newMap = readRegions' s
+  -- print newMap

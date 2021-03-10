@@ -47,11 +47,9 @@ getRegionPossibles r (x:xs) possibles = getRowPossibles x possibles r ++ getRegi
 
 {-- dado um valor e uma regiao, remove o valor das celulas do tipo Possible --}
 
-{-- 
-removeItem _ []                 = []
+removeItem _ [] = []
 removeItem x (y:ys) | x == y    = removeItem x ys
                     | otherwise = y : removeItem x ys
---}
 
 
 contains :: [Int] -> Int -> Bool

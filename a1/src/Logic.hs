@@ -71,9 +71,14 @@ trimRegion vals reg ((Possible ys r):xs) newRow | reg == r = trimRegion vals reg
 trimRegion val reg ((Initial v r):xs) newRow = trimRegion val reg xs (newRow ++ [Initial v r]) -- se for um valor ja certo, nao fazemos modificacao
 
 {-- Dado uma lista de valores, uma regiao e o tabuleiro, retira todos os valores contido na lista dos valores possiveis desta regiao de todo o tabuleiro--}
-trimBoard :: [Value] -> Region -> Board -> Board -> Board
-trimBoard  _ _ [] newBoard = newBoard
-trimBoard vals reg (x:xs) newBoard = trimBoard vals reg xs (newBoard ++ [trimRegion vals reg x []])
+trimBoard' :: [Value] -> Region -> Board -> Board -> Board
+trimBoard' _ _ [] newBoard = newBoard
+trimBoard' vals reg (x:xs) newBoard = trimBoard' vals reg xs (newBoard ++ [trimRegion vals reg x []])
+
+{-- Dado uma lista contendo todas as regioes unicas do tabuleiro, e o proprio tabuleiro, remove os valores repetidos de cada Possible de cada regiao --}
+trimBoard :: [Region] -> Board -> Board 
+trimBoard [] board = board
+trimBoard (x:xs) board = trimBoard xs (trimBoard' (getInitialsValues (getRegionInitials x board []) []) x board [])
 
 {-- dada uma linha, checa se o valor val esta na regiao reg --}
 valueInRegionRow :: Row -> Value -> Region -> Bool
@@ -97,3 +102,11 @@ contains [] _ = False
 contains (x:xs) i 
     | x == i = True
     | otherwise = contains xs i
+    
+
+countLines :: Board -> Int 
+countLines board = countLines' board 0
+
+countLines' :: Board -> Int -> Int 
+countLines' [] num = num
+countLines' (x:xs) num = countLines' xs (num + 1)

@@ -19,7 +19,9 @@ main = do
   -- let regionInitials = getRegionInitials 2 board []
   -- let regionInitialsValues = getInitialsValues regionInitials []
   -- print (trimBoard regionInitialsValues 2 board [])
-  print (valueInRegion board 1 2)
+  -- print (valueInRegion board 1 2)
+  print (show (trimBoard (getUniqueRegions' board) board))
+
   -- print . show $ board
   -- putStrLn "Linhas adjacentes a linha 2"
   -- print (show (adjecentRows board 2 3))

@@ -110,3 +110,28 @@ countLines board = countLines' board 0
 countLines' :: Board -> Int -> Int 
 countLines' [] num = num
 countLines' (x:xs) num = countLines' xs (num + 1)
+
+{-- dada uma linha, retorna a quantidade de celulas de uma certa regiao  --}
+regionCellsCountRow :: Region -> Row -> Int -> Int
+regionCellsCountRow reg [] qnt = qnt
+regionCellsCountRow reg ((Initial v r):xs) qnt | reg == r = regionCellsCountRow reg xs (qnt+1)
+                                             | otherwise = regionCellsCountRow reg xs qnt
+regionCellsCountRow reg ((Possible v r):xs) qnt | reg == r = regionCellsCountRow reg xs (qnt+1)
+                                              | otherwise = regionCellsCountRow reg xs qnt
+                                              
+regionCellsCountBoard' :: Region -> Board -> Int -> Int
+regionCellsCountBoard' reg [] qnt = qnt
+regionCellsCountBoard' reg (x:xs) qnt = regionCellsCountRow reg x qnt + regionCellsCountBoard' reg xs qnt
+
+{-- dada o tabuleiro, retorna a quantidade de celulas de uma certa regiao  --}
+regionCellsCountBoard :: Region -> Board -> Int
+regionCellsCountBoard reg board = regionCellsCountBoard' reg board 0
+
+{-- TODO: adicionar funcao que retira os valores Possible que sao impossiveis. Ex: se uma regia tem 4 celular , os valores possiveis sao 1..4 e nao 1..9 como padrao --}
+{-- talvez especificar isso no arquivo e poupar de fazer funcao? --}
+
+{-- dada uma regiao e a quantidade de celulas desta regiao, ajusta a lista de possiveis valores dessa regiao --}
+removeImpossiblesRow :: Region -> Int -> Row -> Row -> Row
+removeImpossiblesRow reg qnt ((Initial v r):xs) newRow = removeImpossiblesRow reg qnt xs (newRow ++ [Initial v r])
+removeImpossiblesRow reg qnt ((Possible v r):xs) newRow  | reg == r = removeImpossiblesRow reg qnt xs (newRow ++ [Possible [1..qnt] r])
+                                                         | otherwise = removeImpossiblesRow reg qnt xs (newRow ++ [Possible v r])

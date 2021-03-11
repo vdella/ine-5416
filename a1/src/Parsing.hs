@@ -1,5 +1,6 @@
 module Parsing where
 
+
 import qualified Data.Char
 import Types ( Board, Cell(Initial, Possible), Row )
 import Data.Map (Map)
@@ -16,7 +17,18 @@ readBoard (x:xs) list board {-- Nao temos mais o que ler, adiciona linha ao tabu
   | x == '0' = readBoard (drop 2 xs) (list ++ [Possible [1..9] (Data.Char.digitToInt (xs!!1))]) board {-- Marcacao de valor a ser completado, preenchemos com lista de possiveis valores --}
   | otherwise = readBoard (drop 2 xs) (list ++ [Initial (Data.Char.digitToInt x) (Data.Char.digitToInt (xs!!1))]) board {-- valor previamente fixo --}
     
+    
+printRow :: Row -> String -> String
+printRow [] str = str
+printRow ((Initial v r):xs) str = printRow xs (str++(show v)++"("++(show(r))++")"++"             ")
+printRow ((Possible v r):xs) str = printRow xs (str++(show v)++"("++(show(r))++")"++"         ")
 
+printBoard' :: Board -> String -> String 
+printBoard' [] str = str
+printBoard' (x:xs) str = printBoard' xs ((printRow x str)++"\n")
+
+printBoard :: Board -> String 
+printBoard board = printBoard' board ""
 
 -- {-- Reads the file in search of region strings to start its building.
 --     As the return, gives a Map, which takes the region number (an Integer) as the key

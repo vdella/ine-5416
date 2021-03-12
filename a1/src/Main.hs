@@ -20,7 +20,11 @@ main = do
   -- let regionInitialsValues = getInitialsValues regionInitials []
   -- print (trimBoard regionInitialsValues 2 board [])
   -- print (valueInRegion board 1 2)
-  print (show (trimBoard (getUniqueRegions' board) board))
+  putStrLn (printBoard board)
+  print (countLines board)
+  let newBoard = removeImpossiblesBoard (getUniqueRegions' board) board
+  let trimmedBoard =  trimBoard (getUniqueRegions' newBoard) newBoard
+  putStrLn (printBoard trimmedBoard)
 
   -- print . show $ board
   -- putStrLn "Linhas adjacentes a linha 2"

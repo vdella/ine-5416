@@ -132,6 +132,15 @@ regionCellsCountBoard reg board = regionCellsCountBoard' reg board 0
 
 {-- dada uma regiao e a quantidade de celulas desta regiao, ajusta a lista de possiveis valores dessa regiao --}
 removeImpossiblesRow :: Region -> Int -> Row -> Row -> Row
+removeImpossiblesRow _ _ [] newRow = newRow
 removeImpossiblesRow reg qnt ((Initial v r):xs) newRow = removeImpossiblesRow reg qnt xs (newRow ++ [Initial v r])
 removeImpossiblesRow reg qnt ((Possible v r):xs) newRow  | reg == r = removeImpossiblesRow reg qnt xs (newRow ++ [Possible [1..qnt] r])
                                                          | otherwise = removeImpossiblesRow reg qnt xs (newRow ++ [Possible v r])
+
+removeImpossiblesBoard' :: Region -> Int -> Board -> Board -> Board 
+removeImpossiblesBoard' _ _ [] newBoard = newBoard
+removeImpossiblesBoard' reg qnt (x:xs) newBoard = removeImpossiblesBoard' reg qnt xs (newBoard ++ [removeImpossiblesRow reg qnt x []])
+
+removeImpossiblesBoard :: [Region] -> Board -> Board
+removeImpossiblesBoard [x] board = removeImpossiblesBoard' x (regionCellsCountBoard x board) board []
+removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossiblesBoard' x (regionCellsCountBoard x board) board [])

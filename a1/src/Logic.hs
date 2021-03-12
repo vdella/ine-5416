@@ -63,11 +63,12 @@ getUniqueRegions (((Initial _ region):ys):xs) list = if not (contains list regio
 {-- Valores a serem tirados, regiao, linha, vazio--}
 trimRegion :: [Value] -> Region -> Row -> Row -> Row
 trimRegion _ _ [] newRow = newRow
-trimRegion vals reg ((Possible ys r):xs) newRow | reg == r = trimRegion vals reg xs (newRow ++ [Possible (removeValues vals ys) r]) -- se for a regiao alvo, remove o valor da lista de Possible
-                                                | otherwise = trimRegion vals reg xs (newRow ++ [Possible ys r]) -- caso contrario nao mudamos nasa
+trimRegion vals reg ((Possible ys r):xs) newRow | reg == r = trimRegion vals reg xs (newRow ++ [checkSingle (removeValues vals ys) r]) -- se for a regiao alvo, remove o valor da lista de Possible
+                                                | otherwise = trimRegion vals reg xs (newRow ++ [Possible ys r]) -- caso contrario nao mudamos nada
                                                where
                                                    removeValues [] ys = ys
                                                    removeValues (x:xs) ys = removeValues xs (removeItem x ys)
+                                                   checkSingle xs reg = if length ys == 1 then Initial (head ys) r else Possible ys r -- se a lista contiver apenas um elemento, retornamos um Initial
 trimRegion val reg ((Initial v r):xs) newRow = trimRegion val reg xs (newRow ++ [Initial v r]) -- se for um valor ja certo, nao fazemos modificacao
 
 {-- Dado uma lista de valores, uma regiao e o tabuleiro, retira todos os valores contido na lista dos valores possiveis desta regiao de todo o tabuleiro--}
@@ -144,3 +145,5 @@ removeImpossiblesBoard' reg qnt (x:xs) newBoard = removeImpossiblesBoard' reg qn
 removeImpossiblesBoard :: [Region] -> Board -> Board
 removeImpossiblesBoard [x] board = removeImpossiblesBoard' x (regionCellsCountBoard x board) board []
 removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossiblesBoard' x (regionCellsCountBoard x board) board [])
+
+

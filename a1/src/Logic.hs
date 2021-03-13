@@ -3,19 +3,27 @@ module Logic where
 import Types
 
 {-- dado o tabuleiro, indice e max de linhas, devolve as linhas adjacentes  a linha indice --}
-adjecentRows :: Board -> Int -> Int -> [Row]
-adjecentRows board i max | i == 0 = [board!!1]
+adjacentRows :: Board -> Int -> Int -> [Row]
+adjacentRows board i max | i == 0 = [board!!1]
                          | i == max = [board!!(i-1)]  
                          | i >= max = []
-                         | otherwise = [board!!(i-1) ++ board!!i]
+                         | otherwise = [board!!(i-1) ++ board!!(i+1)]
 
 
 {-- dado uma linha adjacente e o indice da celula original e o max de linhas, retorna as celulas adjacentes a essa celula (diagonais inclusas)--}
-adjacentCells :: Row -> Int -> Int -> [Cell]
-adjacentCells row i max | i == 0 = (row!!i) : [row!!(i+1)]
-                        | i == max = (row!!(i-1)) : [row!!i]
-                        | otherwise = [row!!(i-1)] ++ [row!!i] ++ [row!!(i+1)]
+adjacentCellsValues :: Row -> Int -> Int -> [Value]
+adjacentCellsValues [] _ _ = []
+adjacentCellsValues row i max | i == 0 = [cellValue (row!!i)] ++  [cellValue (row!!(i+1))]
+                              | i == max = [cellValue (row!!(i-1))] ++ [cellValue (row!!i)]
+                              | otherwise = [cellValue (row!!(i-1))] ++ [cellValue(row!!i)] ++ [cellValue (row!!(i+1))]
 
+adjacentCellsValues' :: [Row] -> Int -> Int -> [Value]
+adjacentCellsValues' [] _ _ = []
+adjacentCellsValues' (x:xs) i max = (adjacentCellsValues x i max) ++ (adjacentCellsValues' xs i max)
+
+cellValue :: Cell -> Int 
+cellValue (Possible (x:xs) _) = 0
+cellValue (Initial v _) = v
 
 {-- dado uma linha, uma lista para armazenar os Initial e uma regiao, retorna os valores Initial --}
 getRowInitials :: Row -> [Cell] -> Int -> [Cell]
@@ -93,6 +101,7 @@ valueInRegion :: Board -> Value -> Region -> Bool
 valueInRegion [] _ _ = False 
 valueInRegion (x:xs) val reg = valueInRegionRow x val reg || valueInRegion xs val reg
 
+
 removeItem :: Int -> [Int] -> [Int]
 removeItem _ [] = []
 removeItem x (y:ys) | x == y    = removeItem x ys
@@ -147,3 +156,7 @@ removeImpossiblesBoard [x] board = removeImpossiblesBoard' x (regionCellsCountBo
 removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossiblesBoard' x (regionCellsCountBoard x board) board [])
 
 
+
+{-- tabuleiro, valor, x, y--}
+-- checkSafeInsert :: Board -> Value -> Region -> Int -> Int -> Bool
+-- checkSafeInsert board val reg x y = not (valueInRegion board val reg) && 

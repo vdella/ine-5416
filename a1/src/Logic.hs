@@ -7,7 +7,7 @@ adjacentRows :: Board -> Int -> Int -> [Row]
 adjacentRows board i max | i == 0 = [board!!1]
                          | i == max = [board!!(i-1)]  
                          | i >= max = []
-                         | otherwise = [board!!(i-1) ++ board!!(i+1)]
+                         | otherwise = [board!!(i-1)] ++ [board!!(i+1)]
 
 
 {-- dado uma linha adjacente e o indice da celula original e o max de linhas, retorna as celulas adjacentes a essa celula (diagonais inclusas)--}
@@ -158,5 +158,5 @@ removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossibl
 
 
 {-- tabuleiro, valor, x, y--}
--- checkSafeInsert :: Board -> Value -> Region -> Int -> Int -> Bool
--- checkSafeInsert board val reg x y = not (valueInRegion board val reg) && 
+checkSafeInsert :: Board -> Value -> Region -> Int -> Int -> Bool
+checkSafeInsert board val reg x y = not (valueInRegion board val reg) && not (contains (adjacentCellsValues' (adjacentRows board x (countLines board)) y (countLines board)) val)

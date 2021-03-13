@@ -21,6 +21,4 @@ main = do
   let trimmedBoard =  trimBoard (getUniqueRegions' newBoard) newBoard
   putStrLn (printBoard trimmedBoard)
   
-  print (show (adjacentCellsValues (board!!0) 2 5))
-  print (show (adjacentCellsValues' (adjacentRows board 1 5) 2 5))
-  print (show (adjacentRows board 1 5))
+  print (checkSafeInsert board 4 3 1 2)

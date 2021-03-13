@@ -59,7 +59,7 @@ getUniqueRegions ([]:xs) list = getUniqueRegions xs list -- pula a para a proxim
 getUniqueRegions (((Possible _ region):ys):xs) list = if not (contains list region) then getUniqueRegions (ys:xs) (list ++ [region]) else getUniqueRegions (ys:xs) list 
 getUniqueRegions (((Initial _ region):ys):xs) list = if not (contains list region) then getUniqueRegions (ys:xs) (list ++ [region]) else getUniqueRegions (ys:xs) list
 
-{-- dada uma linha, emove uma lista de valores dos valores possiveis de uma regiao --}
+{-- dada uma linha, r   emove uma lista de valores dos valores possiveis de uma regiao --}
 {-- Valores a serem tirados, regiao, linha, vazio--}
 trimRegion :: [Value] -> Region -> Row -> Row -> Row
 trimRegion _ _ [] newRow = newRow

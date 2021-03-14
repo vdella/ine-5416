@@ -76,7 +76,7 @@ trimRegion vals reg ((Possible ys r):xs) newRow | reg == r = trimRegion vals reg
                                                where
                                                    removeValues [] ys = ys
                                                    removeValues (x:xs) ys = removeValues xs (removeItem x ys)
-                                                   checkSingle xs reg = if length ys == 1 then Initial (head ys) r else Possible ys r -- se a lista contiver apenas um elemento, retornamos um Initial
+                                                   checkSingle xs reg = if length xs == 1 then Initial (head xs) r else Possible xs r -- se a lista contiver apenas um elemento, retornamos um Initial
 trimRegion val reg ((Initial v r):xs) newRow = trimRegion val reg xs (newRow ++ [Initial v r]) -- se for um valor ja certo, nao fazemos modificacao
 
 {-- Dado uma lista de valores, uma regiao e o tabuleiro, retira todos os valores contido na lista dos valores possiveis desta regiao de todo o tabuleiro--}
@@ -160,3 +160,12 @@ removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossibl
 {-- tabuleiro, valor, x, y--}
 checkSafeInsert :: Board -> Value -> Region -> Int -> Int -> Bool
 checkSafeInsert board val reg x y = not (valueInRegion board val reg) && not (contains (adjacentCellsValues' (adjacentRows board x (countLines board)) y (countLines board)) val)
+
+
+solveRow :: Board -> Row -> Int -> Int -> Row -> Row -> Row
+solveRow board [] x y newRow previousRow = newRow
+solveRow board ((Initial v r):xs) x y newRow previousRow = solveRow board xs x (y+1) (newRow++[Initial v r]) (previousRow++[Initial v r])
+solveRow board ((Possible [] reg ):xs) x y newRow previousRow = solveRow board previousRow x y newRow previousRow
+solveRow board ((Possible (v:vs) reg):xs) x y newRow previousRow = if checkSafeInsert board y reg x y 
+                                                                    then solveRow board xs x (y+1) (newRow++[Initial y reg]) (previousRow++[Possible (v:vs) reg])
+                                                                    else solveRow board ((Possible vs reg):xs) x y newRow previousRow

@@ -3,18 +3,18 @@ module Logic where
 import Types
 
 {-- dado o tabuleiro, indice e max de linhas, devolve as linhas adjacentes  a linha indice --}
-adjacentRows :: Board -> Int -> Int -> [Row]
-adjacentRows board i max | i == 0 = [board!!1]
-                         | i == max = [board!!(i-1)]  
-                         | i >= max = []
-                         | otherwise = [board!!(i-1)] ++ [board!!(i+1)]
+adjacentRows :: Board -> Int -> [Row]
+adjacentRows board i  | i == 0 = [board!!1]
+                      | i == countLines board  -1 = [board!!(i-1)]  
+                      | i >= countLines board -1 = []
+                      | otherwise = [board!!(i-1)] ++ [board!!(i+1)]
 
 
 {-- dado uma linha adjacente e o indice da celula original e o max de linhas, retorna as celulas adjacentes a essa celula (diagonais inclusas)--}
 adjacentCellsValues :: Row -> Int -> Int -> [Value]
 adjacentCellsValues [] _ _ = []
 adjacentCellsValues row i max | i == 0 = [cellValue (row!!i)] ++  [cellValue (row!!(i+1))]
-                              | i == max = [cellValue (row!!(i-1))] ++ [cellValue (row!!i)]
+                              | i == (max - 1) = [cellValue (row!!(i-1))] ++ [cellValue (row!!i)]
                               | otherwise = [cellValue (row!!(i-1))] ++ [cellValue(row!!i)] ++ [cellValue (row!!(i+1))]
 
 adjacentCellsValues' :: [Row] -> Int -> Int -> [Value]
@@ -157,15 +157,40 @@ removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossibl
 
 
 
-{-- tabuleiro, valor, x, y--}
-checkSafeInsert :: Board -> Value -> Region -> Int -> Int -> Bool
-checkSafeInsert board val reg x y = not (valueInRegion board val reg) && not (contains (adjacentCellsValues' (adjacentRows board x (countLines board)) y (countLines board)) val)
+{-- tabuleiro, valor, regiao, x, y--}
+checkSafeInsert :: Board -> Value -> Int -> Int -> Bool
+checkSafeInsert board val x y = not (valueInRegion board val (getRegion board x y)) && not (contains (adjacentCellsValues' (adjacentRows board x) y (countLines board)) val) && sameRowCheck
+                                    where
+                                        sameRowCheck  | y == 0 = cellValue (board!!x!!(y+1)) /= val 
+                                                      | y == countLines board -1 = cellValue (board!!x!!(y-1)) /= val
+                                                      | otherwise = cellValue (board!!x!!(y-1)) /= val && cellValue (board!!x!!(y+1)) /= val
 
 
-solveRow :: Board -> Row -> Int -> Int -> Row -> Row -> Row
-solveRow board [] x y newRow previousRow = newRow
-solveRow board ((Initial v r):xs) x y newRow previousRow = solveRow board xs x (y+1) (newRow++[Initial v r]) (previousRow++[Initial v r])
-solveRow board ((Possible [] reg ):xs) x y newRow previousRow = solveRow board previousRow x y newRow previousRow
-solveRow board ((Possible (v:vs) reg):xs) x y newRow previousRow = if checkSafeInsert board y reg x y 
-                                                                    then solveRow board xs x (y+1) (newRow++[Initial y reg]) (previousRow++[Possible (v:vs) reg])
-                                                                    else solveRow board ((Possible vs reg):xs) x y newRow previousRow
+{-- dado o tabuleiro e as coordenadas x e y, retorna a regiao da celula --}
+getRegion :: Board -> Int -> Int -> Region
+getRegion board x y = getRegion' (board!!x!!y)
+
+getRegion' :: Cell -> Int 
+getRegion' (Initial _ r) = r
+getRegion' (Possible _ r) = r
+
+solveRow :: Board -> Row -> [Row] -> Int -> Int -> Row -> Row -> Row
+solveRow board [] _ _ _ newRow _ = newRow
+solveRow board ((Initial v r):xs) adjacents i j newRow previousState | j < countLines board -1 = solveRow board xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Initial v r])
+                                                                     | otherwise = solveRow board xs adjacents (i+1) 0 (newRow++[Initial v r]) (previousState++[Initial v r])
+solveRow board ((Possible (v:vs) r):xs) adjacents i j newRow previousState | j < countLines board -1 = if checkSafeInsert board v i j
+                                                                                                        then solveRow (insertValueBoard board v r i j []) xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Possible vs r])
+                                                                                                        else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
+                                                                           | otherwise = if checkSafeInsert board v i j
+                                                                                                        then newRow++[Initial v r] 
+                                                                                                        else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
+
+insertValueRow :: Row -> Value -> Region -> Int -> Row -> Row
+insertValueRow [] _ _ _ newRow = newRow
+insertValueRow (x:xs) val 0 reg newRow =  insertValueRow xs val (-1) reg (newRow ++ [Initial val reg])
+insertValueRow (x:xs) val i reg newRow = insertValueRow xs val (i-1) reg (newRow ++ [x])
+
+insertValueBoard :: Board -> Value -> Region -> Int -> Int -> Board -> Board 
+insertValueBoard [] _ _ _ _ newBoard = newBoard
+insertValueBoard (r:rs) val reg 0 y newBoard = insertValueBoard rs val reg (-1) y (newBoard ++ [insertValueRow r val y reg []])
+insertValueBoard (r:rs) val reg x y newBoard = insertValueBoard rs val reg (x-1) y (newBoard ++ [r])

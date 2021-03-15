@@ -17,8 +17,9 @@ main = do
   putStrLn "-----"
   -- remove os valores impossiveis
   let newBoard = removeImpossiblesBoard (getUniqueRegions' board) board
+  putStrLn (printBoard newBoard)
   -- remove valores ja presentes
   let trimmedBoard =  trimBoard (getUniqueRegions' newBoard) newBoard
   putStrLn (printBoard trimmedBoard)
-  
-  print (checkSafeInsert board 4 3 1 2)
+
+  print (solveRow board (board!!0) (adjacentRows board 0) 0 0 [] [])

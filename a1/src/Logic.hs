@@ -189,12 +189,11 @@ getRegion' (Possible _ r) = r
 {-- tabuleiro, linha em que se comeca o solve, 0, 0, copia do tabuleiro--}                                                                                                            
 solveBoard :: Board -> Row -> Int -> Int -> Board -> Board
 solveBoard board [] _ _ _ = board
-solveBoard board ((Possible (v:vs) r):ys) i j alternativeBoard | j < countLines board -1 = if checkSafeInsert board v i j
-                                                                                                        then solveBoard (insertCellBoard board (Initial v r) i j []) ys i (j+1) (insertCellBoard board (Possible vs r) i j [])
-                                                                                                        else solveBoard alternativeBoard ((Possible (vs) r):ys) i j alternativeBoard
-                                                               | otherwise = if checkSafeInsert board v i j
-                                                                                then solveBoard (insertCellBoard board (Initial v r) i j []) (primeiro (drop (i+1) board)) (i+1) 0 (insertCellBoard board (Possible vs r) i j [])
-                                                                                else solveBoard alternativeBoard ((Possible (vs) r):ys) i j alternativeBoard
+solveBoard board ((Possible [] _):ys) i j alternativeBoard = solveBoard alternativeBoard (drop j (alternativeBoard!!i)) i j alternativeBoard
+solveBoard board ((Possible (v:vs) r):ys) i j alternativeBoard | checkSafeInsert board v i j = if j < countLines board -1
+                                                                                                then solveBoard (insertCellBoard board (Initial v r) i j []) ys i (j+1) (insertCellBoard board (Possible vs r) i j [])
+                                                                                                else solveBoard (insertCellBoard board (Initial v r) i j []) (primeiro (drop (i+1) board)) (i+1) 0 (insertCellBoard board (Possible vs r) i j [])
+                                                               | otherwise = solveBoard board ((Possible (vs) r):ys) i j alternativeBoard 
                                                                 where 
                                                                     primeiro xs | countLines xs == 0 = []
                                                                                 | otherwise = head xs

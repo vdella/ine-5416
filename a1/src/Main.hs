@@ -22,4 +22,10 @@ main = do
   let trimmedBoard =  trimBoard (getUniqueRegions' newBoard) newBoard
   putStrLn (printBoard trimmedBoard)
 
-  print (solveRow board (board!!0) (adjacentRows board 0) 0 0 [] [])
+  -- let solvedRow = solveRow board (board!!0) (adjacentRows board 0) 0 0 [] []
+  
+  -- print solvedRow
+  -- print (solveRow ([solvedRow] ++ (drop 1 trimmedBoard)) (trimmedBoard!!1) (adjacentRows trimmedBoard 1) 0 0 [] [])
+
+  -- print (solveBoard trimmedBoard)
+  putStrLn (printBoard (solveBoard trimmedBoard (trimmedBoard!!0) 0 0 trimmedBoard))

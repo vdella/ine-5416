@@ -174,23 +174,42 @@ getRegion' :: Cell -> Int
 getRegion' (Initial _ r) = r
 getRegion' (Possible _ r) = r
 
-solveRow :: Board -> Row -> [Row] -> Int -> Int -> Row -> Row -> Row
-solveRow board [] _ _ _ newRow _ = newRow
-solveRow board ((Initial v r):xs) adjacents i j newRow previousState | j < countLines board -1 = solveRow board xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Initial v r])
-                                                                     | otherwise = solveRow board xs adjacents (i+1) 0 (newRow++[Initial v r]) (previousState++[Initial v r])
-solveRow board ((Possible (v:vs) r):xs) adjacents i j newRow previousState | j < countLines board -1 = if checkSafeInsert board v i j
-                                                                                                        then solveRow (insertValueBoard board v r i j []) xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Possible vs r])
-                                                                                                        else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
-                                                                           | otherwise = if checkSafeInsert board v i j
-                                                                                                        then newRow++[Initial v r] 
-                                                                                                        else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
+-- {-- board, linha a ser resolvida, linhas adjacentes, x-inicio, y-inicio, vazio, vazio --}
+-- solveRow :: Board -> Row -> [Row] -> Int -> Int -> Board -> Board -> Row
+-- solveRow board [] _ _ _ newBoard _ = newBoard
+-- solveRow board ((Initial v r):xs) adjacents i j newRow previousState | j < countLines board -1 = solveRow board xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Initial v r])
+--                                                                      | otherwise = solveRow board xs adjacents (i+1) 0 (newRow++[Initial v r]) (previousState++[Initial v r])
+-- solveRow board ((Possible (v:vs) r):xs) adjacents i j newRow previousState | j < countLines board -1 = if checkSafeInsert board v i j
+--                                                                                                         then solveRow (insertValueBoard board v r i j []) xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Possible vs r])
+--                                                                                                         else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
+--                                                                            | otherwise = if checkSafeInsert board v i j
+--                                                                                                         then newRow++[Initial v r] 
+--                                                                                                         else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
+                                                                                                            
+solveBoard :: Board -> Row -> Int -> Int -> Board -> Board
+solveBoard board [] _ _ _ = board
+solveBoard board ((Possible (v:vs) r):ys) i j alternativeBoard | j < countLines board -1 = if checkSafeInsert board v i j
+                                                                                                        then solveBoard (insertCellBoard board (Initial v r) i j []) ys i (j+1) (insertCellBoard board (Possible vs r) i j [])
+                                                                                                        else solveBoard alternativeBoard ((Possible (vs) r):ys) i j alternativeBoard
+                                                               | otherwise = if checkSafeInsert board v i j
+                                                                                then solveBoard (insertCellBoard board (Initial v r) i j []) (primeiro (drop (i+1) board)) (i+1) 0 (insertCellBoard board (Possible vs r) i j [])
+                                                                                else solveBoard alternativeBoard ((Possible (vs) r):ys) i j alternativeBoard
+                                                                where 
+                                                                    primeiro xs | countLines xs == 0 = []
+                                                                                | otherwise = head xs
+solveBoard board ((Initial v r):xs) i j alternativeBoard | j < countLines board -1 = solveBoard board xs i (j+1) alternativeBoard
+                                                         | otherwise = solveBoard board (primeiro (drop (i+1) board)) (i+1) 0 alternativeBoard
+                                                         where 
+                                                             primeiro xs | countLines xs == 0 = []
+                                                                         | otherwise = head xs
 
-insertValueRow :: Row -> Value -> Region -> Int -> Row -> Row
-insertValueRow [] _ _ _ newRow = newRow
-insertValueRow (x:xs) val 0 reg newRow =  insertValueRow xs val (-1) reg (newRow ++ [Initial val reg])
-insertValueRow (x:xs) val i reg newRow = insertValueRow xs val (i-1) reg (newRow ++ [x])
 
-insertValueBoard :: Board -> Value -> Region -> Int -> Int -> Board -> Board 
-insertValueBoard [] _ _ _ _ newBoard = newBoard
-insertValueBoard (r:rs) val reg 0 y newBoard = insertValueBoard rs val reg (-1) y (newBoard ++ [insertValueRow r val y reg []])
-insertValueBoard (r:rs) val reg x y newBoard = insertValueBoard rs val reg (x-1) y (newBoard ++ [r])
+insertCellRow :: Row -> Cell -> Int -> Row -> Row
+insertCellRow [] _ _ newRow = newRow
+insertCellRow (x:xs) cell i newRow | i /= 0 = insertCellRow xs cell (i-1) (newRow ++ [x])
+                                   | otherwise = insertCellRow xs cell (i-1) (newRow ++ [cell])
+
+insertCellBoard :: Board -> Cell -> Int -> Int -> Board -> Board
+insertCellBoard [] _ _ _ newBoard = newBoard
+insertCellBoard (r:rs) cell x y newBoard | x == 0 = insertCellBoard rs cell (x-1) y (newBoard ++ [insertCellRow r cell y []])
+                                         | otherwise = insertCellBoard rs cell (x-1) y (newBoard ++ [r])

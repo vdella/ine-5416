@@ -185,7 +185,8 @@ getRegion' (Possible _ r) = r
 --                                                                            | otherwise = if checkSafeInsert board v i j
 --                                                                                                         then newRow++[Initial v r] 
 --                                                                                                         else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
-                                                                                                            
+
+{-- tabuleiro, linha em que se comeca o solve, 0, 0, copia do tabuleiro--}                                                                                                            
 solveBoard :: Board -> Row -> Int -> Int -> Board -> Board
 solveBoard board [] _ _ _ = board
 solveBoard board ((Possible (v:vs) r):ys) i j alternativeBoard | j < countLines board -1 = if checkSafeInsert board v i j
@@ -204,11 +205,13 @@ solveBoard board ((Initial v r):xs) i j alternativeBoard | j < countLines board 
                                                                          | otherwise = head xs
 
 
+{-- adiciona a celula na coluna i da linha Row --}
 insertCellRow :: Row -> Cell -> Int -> Row -> Row
 insertCellRow [] _ _ newRow = newRow
 insertCellRow (x:xs) cell i newRow | i /= 0 = insertCellRow xs cell (i-1) (newRow ++ [x])
                                    | otherwise = insertCellRow xs cell (i-1) (newRow ++ [cell])
 
+{-- adiciona a celula na linha x e coluna y do tabuleiro Board --}
 insertCellBoard :: Board -> Cell -> Int -> Int -> Board -> Board
 insertCellBoard [] _ _ _ newBoard = newBoard
 insertCellBoard (r:rs) cell x y newBoard | x == 0 = insertCellBoard rs cell (x-1) y (newBoard ++ [insertCellRow r cell y []])

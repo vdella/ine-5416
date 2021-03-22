@@ -1,27 +1,28 @@
 module Logic where
 
-import Types
+import Types ( Board, Cell(..), Region, Row, Value )
+import Debug.Trace ()
 
 {-- dado o tabuleiro, indice e max de linhas, devolve as linhas adjacentes  a linha indice --}
 adjacentRows :: Board -> Int -> [Row]
 adjacentRows board i  | i == 0 = [board!!1]
-                      | i == countLines board  -1 = [board!!(i-1)]  
+                      | i == countLines board  -1 = [board!!(i-1)]
                       | i >= countLines board -1 = []
-                      | otherwise = [board!!(i-1)] ++ [board!!(i+1)]
+                      | otherwise = (board!!(i-1)) : [board!!(i+1)]
 
 
 {-- dado uma linha adjacente e o indice da celula original e o max de linhas, retorna as celulas adjacentes a essa celula (diagonais inclusas)--}
 adjacentCellsValues :: Row -> Int -> Int -> [Value]
 adjacentCellsValues [] _ _ = []
-adjacentCellsValues row i max | i == 0 = [cellValue (row!!i)] ++  [cellValue (row!!(i+1))]
-                              | i == (max - 1) = [cellValue (row!!(i-1))] ++ [cellValue (row!!i)]
+adjacentCellsValues row i max | i == 0 = cellValue (row!!i) : [cellValue (row!!(i+1))]
+                              | i == (max - 1) = cellValue (row!!(i-1)) : [cellValue (row!!i)]
                               | otherwise = [cellValue (row!!(i-1))] ++ [cellValue(row!!i)] ++ [cellValue (row!!(i+1))]
 
 adjacentCellsValues' :: [Row] -> Int -> Int -> [Value]
 adjacentCellsValues' [] _ _ = []
-adjacentCellsValues' (x:xs) i max = (adjacentCellsValues x i max) ++ (adjacentCellsValues' xs i max)
+adjacentCellsValues' (x:xs) i max = adjacentCellsValues x i max ++ adjacentCellsValues' xs i max
 
-cellValue :: Cell -> Int 
+cellValue :: Cell -> Int
 cellValue (Possible (x:xs) _) = 0
 cellValue (Initial v _) = v
 
@@ -64,7 +65,7 @@ se sim, ele passa para o proximo item, se nao ele adiciona la lista de regioes. 
 getUniqueRegions :: Board -> [Int] -> [Int]
 getUniqueRegions [] list = list
 getUniqueRegions ([]:xs) list = getUniqueRegions xs list -- pula a para a proxima linha do tabuleiro
-getUniqueRegions (((Possible _ region):ys):xs) list = if not (contains list region) then getUniqueRegions (ys:xs) (list ++ [region]) else getUniqueRegions (ys:xs) list 
+getUniqueRegions (((Possible _ region):ys):xs) list = if not (contains list region) then getUniqueRegions (ys:xs) (list ++ [region]) else getUniqueRegions (ys:xs) list
 getUniqueRegions (((Initial _ region):ys):xs) list = if not (contains list region) then getUniqueRegions (ys:xs) (list ++ [region]) else getUniqueRegions (ys:xs) list
 
 {-- dada uma linha, r   emove uma lista de valores dos valores possiveis de uma regiao --}
@@ -85,20 +86,24 @@ trimBoard' _ _ [] newBoard = newBoard
 trimBoard' vals reg (x:xs) newBoard = trimBoard' vals reg xs (newBoard ++ [trimRegion vals reg x []])
 
 {-- Dado uma lista contendo todas as regioes unicas do tabuleiro, e o proprio tabuleiro, remove os valores repetidos de cada Possible de cada regiao --}
-trimBoard :: [Region] -> Board -> Board 
-trimBoard [] board = board
-trimBoard (x:xs) board = trimBoard xs (trimBoard' (getInitialsValues (getRegionInitials x board []) []) x board [])
+trimBoard :: [Region] -> Board -> Board
+trimBoard xs board
+  = foldl
+      (\ board x
+         -> trimBoard'
+              (getInitialsValues (getRegionInitials x board []) []) x board [])
+      board xs
 
 {-- dada uma linha, checa se o valor val esta na regiao reg --}
 valueInRegionRow :: Row -> Value -> Region -> Bool
-valueInRegionRow [] _ _ = False 
+valueInRegionRow [] _ _ = False
 valueInRegionRow ((Initial v r):xs) val reg | r == reg = v == val || valueInRegionRow xs val reg
                                             | otherwise = valueInRegionRow xs val reg
 valueInRegionRow ((Possible _ _):xs) val reg = valueInRegionRow xs val reg
 
 {-- dado o tabuleiro, checa se o valor val esta na regiao reg --}
 valueInRegion :: Board -> Value -> Region -> Bool
-valueInRegion [] _ _ = False 
+valueInRegion [] _ _ = False
 valueInRegion (x:xs) val reg = valueInRegionRow x val reg || valueInRegion xs val reg
 
 
@@ -109,17 +114,16 @@ removeItem x (y:ys) | x == y    = removeItem x ys
 
 contains :: [Int] -> Int -> Bool
 contains [] _ = False
-contains (x:xs) i 
+contains (x:xs) i
     | x == i = True
     | otherwise = contains xs i
-    
 
-countLines :: Board -> Int 
+
+countLines :: Board -> Int
 countLines board = countLines' board 0
 
-countLines' :: Board -> Int -> Int 
-countLines' [] num = num
-countLines' (x:xs) num = countLines' xs (num + 1)
+countLines' :: Board -> Int -> Int
+countLines' xs num = foldl (\ num x -> num + 1) num xs
 
 {-- dada uma linha, retorna a quantidade de celulas de uma certa regiao  --}
 regionCellsCountRow :: Region -> Row -> Int -> Int
@@ -128,10 +132,9 @@ regionCellsCountRow reg ((Initial v r):xs) qnt | reg == r = regionCellsCountRow 
                                              | otherwise = regionCellsCountRow reg xs qnt
 regionCellsCountRow reg ((Possible v r):xs) qnt | reg == r = regionCellsCountRow reg xs (qnt+1)
                                               | otherwise = regionCellsCountRow reg xs qnt
-                                              
+
 regionCellsCountBoard' :: Region -> Board -> Int -> Int
-regionCellsCountBoard' reg [] qnt = qnt
-regionCellsCountBoard' reg (x:xs) qnt = regionCellsCountRow reg x qnt + regionCellsCountBoard' reg xs qnt
+regionCellsCountBoard' reg xs qnt = foldr (\ x -> (+) (regionCellsCountRow reg x qnt)) qnt xs
 
 {-- dada o tabuleiro, retorna a quantidade de celulas de uma certa regiao  --}
 regionCellsCountBoard :: Region -> Board -> Int
@@ -147,7 +150,7 @@ removeImpossiblesRow reg qnt ((Initial v r):xs) newRow = removeImpossiblesRow re
 removeImpossiblesRow reg qnt ((Possible v r):xs) newRow  | reg == r = removeImpossiblesRow reg qnt xs (newRow ++ [Possible [1..qnt] r])
                                                          | otherwise = removeImpossiblesRow reg qnt xs (newRow ++ [Possible v r])
 
-removeImpossiblesBoard' :: Region -> Int -> Board -> Board -> Board 
+removeImpossiblesBoard' :: Region -> Int -> Board -> Board -> Board
 removeImpossiblesBoard' _ _ [] newBoard = newBoard
 removeImpossiblesBoard' reg qnt (x:xs) newBoard = removeImpossiblesBoard' reg qnt xs (newBoard ++ [removeImpossiblesRow reg qnt x []])
 
@@ -156,12 +159,11 @@ removeImpossiblesBoard [x] board = removeImpossiblesBoard' x (regionCellsCountBo
 removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossiblesBoard' x (regionCellsCountBoard x board) board [])
 
 
-
 {-- tabuleiro, valor, regiao, x, y--}
 checkSafeInsert :: Board -> Value -> Int -> Int -> Bool
 checkSafeInsert board val x y = not (valueInRegion board val (getRegion board x y)) && not (contains (adjacentCellsValues' (adjacentRows board x) y (countLines board)) val) && sameRowCheck
                                     where
-                                        sameRowCheck  | y == 0 = cellValue (board!!x!!(y+1)) /= val 
+                                        sameRowCheck  | y == 0 = cellValue (board!!x!!(y+1)) /= val
                                                       | y == countLines board -1 = cellValue (board!!x!!(y-1)) /= val
                                                       | otherwise = cellValue (board!!x!!(y-1)) /= val && cellValue (board!!x!!(y+1)) /= val
 
@@ -169,43 +171,10 @@ checkSafeInsert board val x y = not (valueInRegion board val (getRegion board x 
 {-- dado o tabuleiro e as coordenadas x e y, retorna a regiao da celula --}
 getRegion :: Board -> Int -> Int -> Region
 getRegion board x y = getRegion' (board!!x!!y)
-
-getRegion' :: Cell -> Int 
-getRegion' (Initial _ r) = r
-getRegion' (Possible _ r) = r
-
--- {-- board, linha a ser resolvida, linhas adjacentes, x-inicio, y-inicio, vazio, vazio --}
--- solveRow :: Board -> Row -> [Row] -> Int -> Int -> Board -> Board -> Row
--- solveRow board [] _ _ _ newBoard _ = newBoard
--- solveRow board ((Initial v r):xs) adjacents i j newRow previousState | j < countLines board -1 = solveRow board xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Initial v r])
---                                                                      | otherwise = solveRow board xs adjacents (i+1) 0 (newRow++[Initial v r]) (previousState++[Initial v r])
--- solveRow board ((Possible (v:vs) r):xs) adjacents i j newRow previousState | j < countLines board -1 = if checkSafeInsert board v i j
---                                                                                                         then solveRow (insertValueBoard board v r i j []) xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Possible vs r])
---                                                                                                         else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
---                                                                            | otherwise = if checkSafeInsert board v i j
---                                                                                                         then newRow++[Initial v r] 
---                                                                                                         else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
-
-{-- tabuleiro, linha em que se comeca o solve, 0, 0, copia do tabuleiro--}                                                                                                            
-solveBoard :: Board -> Row -> Int -> Int -> Board -> Board
-solveBoard board [] _ _ _ = board
-solveBoard board ((Possible [] _):ys) i j alternativeBoard | j > 0 = solveBoard (updatedBoard i (j-1)) (drop (j-1) (updatedBoard i (j-1)!!i)) i (j-1) alternativeBoard -- caso nao haja mais opcoes para colocar no tabuleiro, voltamos para o estado anterior (possivelemnte errado esse segundo alternative board)
-                                                           | otherwise = solveBoard (updatedBoard (i-1) 0) (drop 0 (updatedBoard (i-1) 0!!(i-1))) (i-1) 0 alternativeBoard
-                                                            where
-                                                                updatedBoard x y = (insertCellBoard board (alternativeBoard!!x!!y) x y [])
-solveBoard board ((Possible (v:vs) r):ys) i j alternativeBoard | checkSafeInsert board v i j = if j < countLines board -1 -- checa se podemos inserir
-                                                                                                then solveBoard (insertCellBoard board (Initial v r) i j []) ys i (j+1) (insertCellBoard board (removeFromPossible (board!!i!!j) v) i j []) -- inserimos e salvamos o board alternativo com os outros valores possiveis
-                                                                                                else solveBoard (insertCellBoard board (Initial v r) i j []) (primeiro (drop (i+1) board)) (i+1) 0 (insertCellBoard board (removeFromPossible (board!!i!!j) v) i j []) -- mesma coisa mas pulamos a linha
-                                                               | otherwise = solveBoard board ((Possible (vs) r):ys) i j alternativeBoard -- nao podemos inserir, tentamos com o proximo valor possivel
-                                                                where 
-                                                                    primeiro xs | countLines xs == 0 = []
-                                                                                | otherwise = head xs
-solveBoard board ((Initial v r):xs) i j alternativeBoard | j < countLines board -1 = solveBoard board xs i (j+1) alternativeBoard -- pulamos initials
-                                                         | otherwise = solveBoard board (primeiro (drop (i+1) board)) (i+1) 0 alternativeBoard
-                                                         where 
-                                                             primeiro xs | countLines xs == 0 = []
-                                                                         | otherwise = head xs
-
+                      where
+                          getRegion' :: Cell -> Int
+                          getRegion' (Initial _ r) = r
+                          getRegion' (Possible _ r) = r
 
 {-- adiciona a celula na coluna i da linha Row --}
 insertCellRow :: Row -> Cell -> Int -> Row -> Row

@@ -9,7 +9,6 @@ import qualified Data.Map as Map
 
 main :: IO ()
 main = do
-  --s <- readFile "suguru_board.txt"
   s <- readFile "sudoku.txt"
   let max = Data.Char.digitToInt (head s)
   let board = readBoard max (drop 1 s) []

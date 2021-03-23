@@ -73,16 +73,16 @@ tryInsert i board cell = take i board ++ [cell] ++ drop (i + 1) board
 
 
 nextBlank :: Int -> Board -> Int
-nextBlank i board | i == (length board) = length board
+nextBlank i board | i == length board -1 = length board -1
                   | cellValue (board !! (i + 1)) == 0 = i + 1
                   | otherwise = nextBlank (i + 1) board
                   
 solve :: Int -> Int -> Board -> [Int] -> Board
-solve i max board (x:xs) | i == (length board) && (x:xs) == [] = []
-                         | i == (length board) && xs == [] = tryInsert i board (Initial x region)
-                         | i == (length board) = []
-                         | (x:xs) == [] = []
-                         | solvedAhead == [] = solve i max board xs
+solve 24 max board [] = trace (show board) []
+solve 24 max board (x:[]) = trace (show board) []
+solve 24 max board (x:_) = trace (show board) []
+solve _ max board [] = trace (show board) []
+solve i max board (x:xs) | solvedAhead == [] = trace ("Insert " ++ show x ++ " failed at " ++ show (itopoint i max)) solve i max board xs
                          | otherwise = solvedAhead
                          where solveNext i board = solve (nextBlank i board) max board (possiblesAt (nextBlank i board) max board)
                                solvedAhead = solveNext i (tryInsert i board (Initial x region))

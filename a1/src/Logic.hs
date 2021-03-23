@@ -18,7 +18,7 @@ adjRow i max board = helper (itopoint i max)
                         | otherwise = [board !! pointToi (i, j+1) max] ++ [board !! pointToi (i, j-1) max]
 
 adjCol :: Int -> Int -> Board -> [Cell]
-adjCol i max board = trace (show (itopoint i max)) helper (itopoint i max)
+adjCol i max board = helper (itopoint i max)
     where helper (i, j) | (i-1) < 0 && (j+1) > (max-1) = [board !! pointToi (i+1, j) max] ++ [board !! pointToi (i+1, j-1) max]
                         | (i-1) < 0 && (j-1) < 0 = [board !! pointToi (i+1, j) max] ++ [board !! pointToi (i+1, j+1) max]
                         | (i-1) < 0 = [board !! pointToi (i+1, j) max] ++ [board !! pointToi (i+1, j+1) max] ++ [board !! pointToi (i+1, j-1) max]
@@ -78,11 +78,11 @@ nextBlank i board | i == length board -1 = length board -1
                   | otherwise = nextBlank (i + 1) board
                   
 solve :: Int -> Int -> Board -> [Int] -> Board
-solve 24 max board [] = trace (show board) []
-solve 24 max board (x:[]) = trace (show board) []
-solve 24 max board (x:_) = trace (show board) []
-solve _ max board [] = trace (show board) []
-solve i max board (x:xs) | solvedAhead == [] = trace ("Insert " ++ show x ++ " failed at " ++ show (itopoint i max)) solve i max board xs
+solve 24 max board [] = []
+solve 24 max board (x:[]) = tryInsert 24 board (Initial x (cellRegion (board!!24)))
+solve 24 max board (x:_) = []
+solve _ max board [] = []
+solve i max board (x:xs) | solvedAhead == [] = solve i max board xs
                          | otherwise = solvedAhead
                          where solveNext i board = solve (nextBlank i board) max board (possiblesAt (nextBlank i board) max board)
                                solvedAhead = solveNext i (tryInsert i board (Initial x region))

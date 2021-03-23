@@ -1,191 +1,125 @@
 module Logic where
 
-import Types ( Board, Cell(..), Region, Row, Value )
+import Types ( Cell(..), Board )
 import Debug.Trace ()
 
-{-- dado o tabuleiro, indice e max de linhas, devolve as linhas adjacentes  a linha indice --}
-adjacentRows :: Board -> Int -> [Row]
-adjacentRows board i  | i == 0 = [board!!1]
-                      | i == countLines board  -1 = [board!!(i-1)]
-                      | i >= countLines board -1 = []
-                      | otherwise = (board!!(i-1)) : [board!!(i+1)]
+-- Converte um índice i em um par (i,j), indicando linha e coluna, respectivamente, no tabuleiro.
+itopoint :: Int -> Int -> (Int, Int)
+itopoint i max = (calcX i, calcY i)
+    where calcY i = i - max * div i max
+          calcX i = div i max
+
+-- Converte um ponto (i,j) do tabuleiro em um índice na lista.
+pointToi :: (Int, Int) -> Int -> Int
+pointToi (i, j) max = j + i * max
+
+-- Retorna as células adjacentes ao índice i que se encontram na mesma linha.
+adjRow :: Int -> Int -> Board -> [Cell]
+adjRow i max board = helper (itopoint i max) -- Converte o índice para um ponto (i,j) para sabermos quais os vizinhos relativos.
+    where helper (i, j) | j-1 < 0 = [board !! pointToi (i, j+1) max]
+                        | j+1 >= max = [board !! pointToi (i, j-1) max]
+                        | otherwise = (board !! pointToi (i, j+1) max) : [board !! pointToi (i, j-1) max]
 
 
-{-- dado uma linha adjacente e o indice da celula original e o max de linhas, retorna as celulas adjacentes a essa celula (diagonais inclusas)--}
-adjacentCellsValues :: Row -> Int -> Int -> [Value]
-adjacentCellsValues [] _ _ = []
-adjacentCellsValues row i max | i == 0 = cellValue (row!!i) : [cellValue (row!!(i+1))]
-                              | i == (max - 1) = cellValue (row!!(i-1)) : [cellValue (row!!i)]
-                              | otherwise = [cellValue (row!!(i-1))] ++ [cellValue(row!!i)] ++ [cellValue (row!!(i+1))]
+-- Retorna as células adjacentes ao índice i que se encontram na mesma coluna e nas diagonais
+adjCol :: Int -> Int -> Board -> [Cell]
+adjCol i max board = helper (itopoint i max) -- Converte o índice i para um ponto (i,j) para que se saiba os vizinhos relativos.
 
-adjacentCellsValues' :: [Row] -> Int -> Int -> [Value]
-adjacentCellsValues' [] _ _ = []
-adjacentCellsValues' (x:xs) i max = adjacentCellsValues x i max ++ adjacentCellsValues' xs i max
+    {-- Faz-se um bound-check para que se tenha certeza de que os valores são imediatamente adjacentes; para isto
+     é necessário verificar se i ou j possuem valores equivalentes aos dos limites do tabuleiro: 0 ou lenght - 1.
+    --}
+    where helper (i, j) | i-1 < 0 && j+1 > max-1 = 
+                            (board !! pointToi (i+1, j) max) : [board !! pointToi (i+1, j-1) max]
+                        | i-1 < 0 && j-1 < 0 = 
+                            (board !! pointToi (i+1, j) max) : [board !! pointToi (i+1, j+1) max]
+                        | i-1 < 0 = 
+                            [board !! pointToi (i+1, j) max] ++ [board !! pointToi (i+1, j+1) max] ++ [board !! pointToi (i+1, j-1) max]
+                        | i+1 > max-1 && j+1 > max-1 = 
+                            (board !! pointToi (i-1, j) max) : [board !! pointToi (i-1, j-1) max]
+                        | i+1 > max-1 && j-1 < 0 = 
+                            (board !! pointToi (i-1, j) max) : [board !! pointToi (i-1, j+1) max]
+                        | i+1 > max-1 = 
+                            [board !! pointToi (i-1, j) max] ++ [board !! pointToi (i-1, j+1) max] ++ [board !! pointToi (i-1, j-1) max]
+                        | j-1 < 0 = 
+                            [board !! pointToi (i+1, j) max] ++ [board !! pointToi (i+1, j+1) max] ++ [board !! pointToi (i-1, j) max] ++ [board !! pointToi (i-1, j+1) max]
+                        | j+1 > max-1 = 
+                            [board !! pointToi (i+1, j) max] ++ [board !! pointToi (i+1, j-1) max] ++ [board !! pointToi (i-1, j) max] ++ [board !! pointToi (i-1, j-1) max]
+                        | otherwise = 
+                            [board !! pointToi (i+1, j) max]   ++
+                            [board !! pointToi (i-1, j) max]   ++
+                            [board !! pointToi (i+1, j+1) max] ++
+                            [board !! pointToi (i+1, j-1) max] ++
+                            [board !! pointToi (i-1, j+1) max] ++
+                            [board !! pointToi (i-1, j-1) max]
 
+-- Dada uma lista de células, retorna-se uma lista com seus valores correspondentes.
+cellsToVals :: [Cell] -> [Int]
+cellsToVals [] = []
+cellsToVals ((Initial v r):xs) = v : cellsToVals xs
+
+-- Retorna-se a região de uma dada célula.
+cellRegion :: Cell -> Int
+cellRegion (Initial _ r) = r
+
+-- Retorna-se o valor de uma célula.
 cellValue :: Cell -> Int
-cellValue (Possible (x:xs) _) = 0
 cellValue (Initial v _) = v
 
-{-- dado uma linha, uma lista para armazenar os Initial e uma regiao, retorna os valores Initial --}
-getRowInitials :: Row -> [Cell] -> Int -> [Cell]
-getRowInitials [] initials _ = initials
-getRowInitials ((Possible ys r):xs) initials reg = getRowInitials xs initials reg
-getRowInitials ((Initial x r):xs) initials reg | r == reg = getRowInitials xs (initials ++ [Initial x r]) reg
-                                               | otherwise = getRowInitials xs initials reg
+-- Retorna uma lista de células pertencentes à região de entrada.
+inRegion :: Int -> Int -> Board -> [Cell]
+inRegion _ _ [] = []
+inRegion region max ((Initial v r):xs) 
+    | region == r = Initial v r : inRegion region max xs
+    | otherwise = inRegion region max xs
+
+-- Retorna o tamanho da região de entrada como o seu tamanho em células.
+regionLength :: Int -> Int -> Board -> Int
+regionLength region max board = length (inRegion region max board)
+
+-- Remove da primeira lista os valores presentes na segunda lista.
+removeVal :: [Int] -> [Int] -> [Int]
+removeVal [] _ = []
+removeVal xs [] = xs
+removeVal xs (y:ys) = removeVal (removeAll y xs) ys
+
+-- Remove da lista todas as ocorr6encias de um dado valor.
+removeAll :: Int -> [Int] -> [Int]
+removeAll _ [] = []
+removeAll y (x:xs) | x == y = removeAll y xs
+                   | otherwise = x : removeAll y xs
+
+-- Retorna todos os valores que são possíveis a serem inseridos no índice de entrada.
+possiblesAt :: Int -> Int -> Board -> [Int]
+possiblesAt i max board 
+    | i > length board = []
+    | cellValue( board !! i) == 0 = [1..rmax] `removeVal` cellsToVals (adjRow i max board ++ adjCol i max board ++ inRegion (cellRegion (board!!i)) max board)
+    | otherwise = [cellValue (board !! i)]
+    where rmax = regionLength (cellRegion (board !! i)) max board
+
+-- Insere a célula dada como entrada no tabuleiro.
+tryInsert :: Int -> Board -> Cell -> Board
+tryInsert i board cell = take i board ++ [cell] ++ drop (i + 1) board
 
 
-{-- dado uma regiao, o tabuleiro e uma lista para armazenar os valores, retorna os valores iniciais desta regiao --}
-getRegionInitials :: Int -> Board -> [Cell] -> [Cell]
-getRegionInitials _ [] initials = initials
-getRegionInitials r (x:xs) initials = getRowInitials x initials r ++ getRegionInitials r xs initials
+-- Retorna o índice correspondente à próxima célula em que é possível inserir um valor.
+nextPossible :: Int -> Board -> Int
+nextPossible i board | i == length board -1 = length board -1
+                  | cellValue (board !! (i + 1)) == 0 = i + 1
+                  | otherwise = nextPossible (i + 1) board
 
-getInitialsValues :: [Cell] -> [Int] -> [Int]
-getInitialsValues [] list = list
-getInitialsValues ((Initial x r):xs) list = getInitialsValues xs (list ++ [x])
+{-- Itera sobre as células do tabuleiro tentando inserir um valor da lista de possíveis valores. Caso falhe em encontrar valores disponíveis,
+    tenta novamente com o próximo valor possível até resolver o tabuleiro. --}
+solve :: Int -> Int -> Board -> [Int] -> Board
+solve 24 max board [] = []
+solve 24 max board [x] = tryInsert 24 board (Initial x (cellRegion (board!!24)))
+solve 24 max board (x:_) = []
+solve _ max board [] = []
+solve i max board (x:xs) | null solvedAhead = solve i max board xs
+                         | otherwise = solvedAhead
+                         where solveNext i board = solve (nextPossible i board) max board (possiblesAt (nextPossible i board) max board)
+                               solvedAhead = solveNext i (tryInsert i board (Initial x region))
+                               region = cellRegion (board!!i)
 
-{-- dado uma linha, uma lista para armazenar os Possible e uma regiao, retorna os valores Possible --}
-getRowPossibles :: Row -> [Cell] -> Int -> [Cell]
-getRowPossibles [] possibles _ = possibles
-getRowPossibles ((Initial y r):xs) possibles reg = getRowPossibles xs possibles reg
-getRowPossibles ((Possible ys r):xs) possibles reg | r == reg = getRowPossibles xs (possibles ++ [Possible ys r]) reg
-                                                  | otherwise = getRowPossibles xs possibles reg
-
-
-{-- dado uma regiao, o tabuleiro e uma lista para armazenar os valores, retorna os valores iniciais desta regiao --}
-getRegionPossibles :: Int -> Board -> [Cell] -> [Cell]
-getRegionPossibles _ [] possibles = possibles
-getRegionPossibles r (x:xs) possibles = getRowPossibles x possibles r ++ getRegionPossibles r xs possibles
-
-getUniqueRegions' :: Board -> [Int]
-getUniqueRegions' board = getUniqueRegions board []
-
-{-- retorna as regioes que existem no tabuleiro --}
-{-- como temos uma lista de listas, o algoritmo compara se a regiao do primeiro item da primeira lista esta na lista de regioes,
-se sim, ele passa para o proximo item, se nao ele adiciona la lista de regioes. Quando esgotamos a primeira lista, passamos para a proxima--}
-getUniqueRegions :: Board -> [Int] -> [Int]
-getUniqueRegions [] list = list
-getUniqueRegions ([]:xs) list = getUniqueRegions xs list -- pula a para a proxima linha do tabuleiro
-getUniqueRegions (((Possible _ region):ys):xs) list = if not (contains list region) then getUniqueRegions (ys:xs) (list ++ [region]) else getUniqueRegions (ys:xs) list
-getUniqueRegions (((Initial _ region):ys):xs) list = if not (contains list region) then getUniqueRegions (ys:xs) (list ++ [region]) else getUniqueRegions (ys:xs) list
-
-{-- dada uma linha, r   emove uma lista de valores dos valores possiveis de uma regiao --}
-{-- Valores a serem tirados, regiao, linha, vazio--}
-trimRegion :: [Value] -> Region -> Row -> Row -> Row
-trimRegion _ _ [] newRow = newRow
-trimRegion vals reg ((Possible ys r):xs) newRow | reg == r = trimRegion vals reg xs (newRow ++ [checkSingle (removeValues vals ys) r]) -- se for a regiao alvo, remove o valor da lista de Possible
-                                                | otherwise = trimRegion vals reg xs (newRow ++ [Possible ys r]) -- caso contrario nao mudamos nada
-                                               where
-                                                   removeValues [] ys = ys
-                                                   removeValues (x:xs) ys = removeValues xs (removeItem x ys)
-                                                   checkSingle xs reg = if length xs == 1 then Initial (head xs) r else Possible xs r -- se a lista contiver apenas um elemento, retornamos um Initial
-trimRegion val reg ((Initial v r):xs) newRow = trimRegion val reg xs (newRow ++ [Initial v r]) -- se for um valor ja certo, nao fazemos modificacao
-
-{-- Dado uma lista de valores, uma regiao e o tabuleiro, retira todos os valores contido na lista dos valores possiveis desta regiao de todo o tabuleiro--}
-trimBoard' :: [Value] -> Region -> Board -> Board -> Board
-trimBoard' _ _ [] newBoard = newBoard
-trimBoard' vals reg (x:xs) newBoard = trimBoard' vals reg xs (newBoard ++ [trimRegion vals reg x []])
-
-{-- Dado uma lista contendo todas as regioes unicas do tabuleiro, e o proprio tabuleiro, remove os valores repetidos de cada Possible de cada regiao --}
-trimBoard :: [Region] -> Board -> Board
-trimBoard xs board
-  = foldl
-      (\ board x
-         -> trimBoard'
-              (getInitialsValues (getRegionInitials x board []) []) x board [])
-      board xs
-
-{-- dada uma linha, checa se o valor val esta na regiao reg --}
-valueInRegionRow :: Row -> Value -> Region -> Bool
-valueInRegionRow [] _ _ = False
-valueInRegionRow ((Initial v r):xs) val reg | r == reg = v == val || valueInRegionRow xs val reg
-                                            | otherwise = valueInRegionRow xs val reg
-valueInRegionRow ((Possible _ _):xs) val reg = valueInRegionRow xs val reg
-
-{-- dado o tabuleiro, checa se o valor val esta na regiao reg --}
-valueInRegion :: Board -> Value -> Region -> Bool
-valueInRegion [] _ _ = False
-valueInRegion (x:xs) val reg = valueInRegionRow x val reg || valueInRegion xs val reg
-
-
-removeItem :: Int -> [Int] -> [Int]
-removeItem _ [] = []
-removeItem x (y:ys) | x == y    = removeItem x ys
-                    | otherwise = y : removeItem x ys
-
-contains :: [Int] -> Int -> Bool
-contains [] _ = False
-contains (x:xs) i
-    | x == i = True
-    | otherwise = contains xs i
-
-countLines :: Board -> Int
-countLines board = countLines' board 0
-
-countLines' :: Board -> Int -> Int
-countLines' xs num = foldl (\ num x -> num + 1) num xs
-
-{-- dada uma linha, retorna a quantidade de celulas de uma certa regiao  --}
-regionCellsCountRow :: Region -> Row -> Int -> Int
-regionCellsCountRow reg [] qnt = qnt
-regionCellsCountRow reg ((Initial v r):xs) qnt | reg == r = regionCellsCountRow reg xs (qnt+1)
-                                             | otherwise = regionCellsCountRow reg xs qnt
-regionCellsCountRow reg ((Possible v r):xs) qnt | reg == r = regionCellsCountRow reg xs (qnt+1)
-                                              | otherwise = regionCellsCountRow reg xs qnt
-
-regionCellsCountBoard' :: Region -> Board -> Int -> Int
-regionCellsCountBoard' reg xs qnt = foldr (\ x -> (+) (regionCellsCountRow reg x qnt)) qnt xs
-
-{-- dada o tabuleiro, retorna a quantidade de celulas de uma certa regiao  --}
-regionCellsCountBoard :: Region -> Board -> Int
-regionCellsCountBoard reg board = regionCellsCountBoard' reg board 0
-
-{-- TODO: adicionar funcao que retira os valores Possible que sao impossiveis. Ex: se uma regia tem 4 celular , os valores possiveis sao 1..4 e nao 1..9 como padrao --}
-{-- talvez especificar isso no arquivo e poupar de fazer funcao? --}
-
-{-- dada uma regiao e a quantidade de celulas desta regiao, ajusta a lista de possiveis valores dessa regiao --}
-removeImpossiblesRow :: Region -> Int -> Row -> Row -> Row
-removeImpossiblesRow _ _ [] newRow = newRow
-removeImpossiblesRow reg qnt ((Initial v r):xs) newRow = removeImpossiblesRow reg qnt xs (newRow ++ [Initial v r])
-removeImpossiblesRow reg qnt ((Possible v r):xs) newRow  | reg == r = removeImpossiblesRow reg qnt xs (newRow ++ [Possible [1..qnt] r])
-                                                         | otherwise = removeImpossiblesRow reg qnt xs (newRow ++ [Possible v r])
-
-removeImpossiblesBoard' :: Region -> Int -> Board -> Board -> Board
-removeImpossiblesBoard' _ _ [] newBoard = newBoard
-removeImpossiblesBoard' reg qnt (x:xs) newBoard = removeImpossiblesBoard' reg qnt xs (newBoard ++ [removeImpossiblesRow reg qnt x []])
-
-removeImpossiblesBoard :: [Region] -> Board -> Board
-removeImpossiblesBoard [x] board = removeImpossiblesBoard' x (regionCellsCountBoard x board) board []
-removeImpossiblesBoard (x:xs) board = removeImpossiblesBoard xs (removeImpossiblesBoard' x (regionCellsCountBoard x board) board [])
-
-
-{-- tabuleiro, valor, regiao, x, y--}
-checkSafeInsert :: Board -> Value -> Int -> Int -> Bool
-checkSafeInsert board val x y = not (valueInRegion board val (getRegion board x y)) && not (contains (adjacentCellsValues' (adjacentRows board x) y (countLines board)) val) && sameRowCheck
-                                    where
-                                        sameRowCheck  | y == 0 = cellValue (board!!x!!(y+1)) /= val
-                                                      | y == countLines board -1 = cellValue (board!!x!!(y-1)) /= val
-                                                      | otherwise = cellValue (board!!x!!(y-1)) /= val && cellValue (board!!x!!(y+1)) /= val
-
-
-{-- dado o tabuleiro e as coordenadas x e y, retorna a regiao da celula --}
-getRegion :: Board -> Int -> Int -> Region
-getRegion board x y = getRegion' (board!!x!!y)
-                      where
-                          getRegion' :: Cell -> Int
-                          getRegion' (Initial _ r) = r
-                          getRegion' (Possible _ r) = r
-
-{-- adiciona a celula na coluna i da linha Row --}
-insertCellRow :: Row -> Cell -> Int -> Row -> Row
-insertCellRow [] _ _ newRow = newRow
-insertCellRow (x:xs) cell i newRow | i /= 0 = insertCellRow xs cell (i-1) (newRow ++ [x])
-                                   | otherwise = insertCellRow xs cell (i-1) (newRow ++ [cell])
-
-{-- adiciona a celula na linha x e coluna y do tabuleiro Board --}
-insertCellBoard :: Board -> Cell -> Int -> Int -> Board -> Board
-insertCellBoard [] _ _ _ newBoard = newBoard
-insertCellBoard (r:rs) cell x y newBoard | x == 0 = insertCellBoard rs cell (x-1) y (newBoard ++ [insertCellRow r cell y []])
-                                         | otherwise = insertCellBoard rs cell (x-1) y (newBoard ++ [r])
-
-removeFromPossible :: Cell -> Value -> Cell
-removeFromPossible (Possible x r) val = Possible (filter (/= val) x) r
+-- Chama a função responsável pela resolução do tabuleiro.
+solveBoard :: Int -> Board -> Board
+solveBoard max board = solve 0 max board (possiblesAt 0 max board)

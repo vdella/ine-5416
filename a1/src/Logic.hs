@@ -110,11 +110,11 @@ nextPossible i board | i == length board -1 = length board -1
 {-- Itera sobre as células do tabuleiro tentando inserir um valor da lista de possíveis valores. Caso falhe em encontrar valores disponíveis,
     tenta novamente com o próximo valor possível até resolver o tabuleiro. --}
 solve :: Int -> Int -> Board -> [Int] -> Board
-solve 24 max board [] = []
-solve 24 max board [x] = tryInsert 24 board (Initial x (cellRegion (board!!24)))
-solve 24 max board (x:_) = []
 solve _ max board [] = []
-solve i max board (x:xs) | null solvedAhead = solve i max board xs
+solve i max board (x:xs) | i == length board -1 && null (x:xs) = []
+                         | i == length board -1 && null xs = tryInsert i board (Initial x (cellRegion (board!!i)))
+                         | i == length board -1 && not (null [x]) = []
+                         | null solvedAhead = solve i max board xs
                          | otherwise = solvedAhead
                          where solveNext i board = solve (nextPossible i board) max board (possiblesAt (nextPossible i board) max board)
                                solvedAhead = solveNext i (tryInsert i board (Initial x region))

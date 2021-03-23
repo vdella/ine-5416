@@ -11,21 +11,16 @@ main :: IO ()
 main = do
   --s <- readFile "suguru_board.txt"
   s <- readFile "sudoku.txt"
-  let board = readBoard' s 
-  print (show board)
-  print (show (getUniqueRegions' board))
-  putStrLn "-----"
-  -- remove os valores impossiveis
-  let newBoard = removeImpossiblesBoard (getUniqueRegions' board) board
-  putStrLn (printBoard newBoard)
-  -- remove valores ja presentes
-  let trimmedBoard =  trimBoard (getUniqueRegions' newBoard) newBoard
-  putStrLn (printBoard trimmedBoard)
+  let max = Data.Char.digitToInt (head s)
+  print max
+  let board = readBoard max (drop 1 s) []
+  -- print board
+  -- print (itopoint 7 max )
+  -- print (pointToi (1, 0) max)
+  -- print (adjRow 4 max board)
+  -- print (adjCol 7 max board)
+  -- print (inRegion 2 max board)
+  -- print (possiblesAt 8 max board)
+  print (solveBoard max board)
 
-  -- let solvedRow = solveRow board (board!!0) (adjacentRows board 0) 0 0 [] []
-  
-  -- print solvedRow
-  -- print (solveRow ([solvedRow] ++ (drop 1 trimmedBoard)) (trimmedBoard!!1) (adjacentRows trimmedBoard 1) 0 0 [] [])
-
-  print (solveBoard trimmedBoard (trimmedBoard!!0) 0 0 trimmedBoard)
   

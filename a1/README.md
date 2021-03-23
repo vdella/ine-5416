@@ -1,3 +1,11 @@
+
+### TODO
+- [x] Leitura inicial de Tabuleiro
+- [ ] Leitura de tabuleiro com regioes suguru
+- [ ] Remocao preliminar de valores invalidos em cada regiao
+- [ ] Checagem de valores adjacentes
+- [ ] Backtracking
+
 Suguru is a game in which the player has to fill
 cells carefully placed inside a grid of changeble size.
 

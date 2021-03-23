@@ -27,5 +27,5 @@ main = do
   -- print solvedRow
   -- print (solveRow ([solvedRow] ++ (drop 1 trimmedBoard)) (trimmedBoard!!1) (adjacentRows trimmedBoard 1) 0 0 [] [])
 
-  -- print (solveBoard trimmedBoard)
-  putStrLn (printBoard (solveBoard trimmedBoard (trimmedBoard!!0) 0 0 trimmedBoard))
+  print (solveBoard trimmedBoard (trimmedBoard!!0) 0 0 trimmedBoard)
+  

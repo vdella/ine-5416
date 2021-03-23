@@ -1,6 +1,7 @@
 module Logic where
 
 import Types
+import Debug.Trace
 
 {-- dado o tabuleiro, indice e max de linhas, devolve as linhas adjacentes  a linha indice --}
 adjacentRows :: Board -> Int -> [Row]
@@ -174,29 +175,14 @@ getRegion' :: Cell -> Int
 getRegion' (Initial _ r) = r
 getRegion' (Possible _ r) = r
 
--- {-- board, linha a ser resolvida, linhas adjacentes, x-inicio, y-inicio, vazio, vazio --}
--- solveRow :: Board -> Row -> [Row] -> Int -> Int -> Board -> Board -> Row
--- solveRow board [] _ _ _ newBoard _ = newBoard
--- solveRow board ((Initial v r):xs) adjacents i j newRow previousState | j < countLines board -1 = solveRow board xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Initial v r])
---                                                                      | otherwise = solveRow board xs adjacents (i+1) 0 (newRow++[Initial v r]) (previousState++[Initial v r])
--- solveRow board ((Possible (v:vs) r):xs) adjacents i j newRow previousState | j < countLines board -1 = if checkSafeInsert board v i j
---                                                                                                         then solveRow (insertValueBoard board v r i j []) xs adjacents i (j+1) (newRow++[Initial v r]) (previousState++[Possible vs r])
---                                                                                                         else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
---                                                                            | otherwise = if checkSafeInsert board v i j
---                                                                                                         then newRow++[Initial v r] 
---                                                                                                         else solveRow board (Possible vs r : xs) adjacents i j newRow previousState
-
 {-- tabuleiro, linha em que se comeca o solve, 0, 0, copia do tabuleiro--}                                                                                                            
 solveBoard :: Board -> Row -> Int -> Int -> Board -> Board
 solveBoard board [] _ _ _ = board
-solveBoard board ((Possible [] _):ys) i j alternativeBoard | j > 0 = solveBoard (updatedBoard i (j-1)) (drop (j-1) (updatedBoard i (j-1)!!i)) i (j-1) alternativeBoard -- caso nao haja mais opcoes para colocar no tabuleiro, voltamos para o estado anterior (possivelemnte errado esse segundo alternative board)
-                                                           | otherwise = solveBoard (updatedBoard (i-1) 0) (drop 0 (updatedBoard (i-1) 0!!(i-1))) (i-1) 0 alternativeBoard
-                                                            where
-                                                                updatedBoard x y = (insertCellBoard board (alternativeBoard!!x!!y) x y [])
+solveBoard board ((Possible [] _):ys) i j alternativeBoard = solveBoard (traceBack board i j alternativeBoard) ((traceBack board i j alternativeBoard)!!0) 0 0 alternativeBoard
 solveBoard board ((Possible (v:vs) r):ys) i j alternativeBoard | checkSafeInsert board v i j = if j < countLines board -1 -- checa se podemos inserir
-                                                                                                then solveBoard (insertCellBoard board (Initial v r) i j []) ys i (j+1) (insertCellBoard board (removeFromPossible (board!!i!!j) v) i j []) -- inserimos e salvamos o board alternativo com os outros valores possiveis
-                                                                                                else solveBoard (insertCellBoard board (Initial v r) i j []) (primeiro (drop (i+1) board)) (i+1) 0 (insertCellBoard board (removeFromPossible (board!!i!!j) v) i j []) -- mesma coisa mas pulamos a linha
-                                                               | otherwise = solveBoard board ((Possible (vs) r):ys) i j alternativeBoard -- nao podemos inserir, tentamos com o proximo valor possivel
+                                                                                                then trace("##Adicionando " ++ show v ++ " em " ++ show i ++ " " ++ show j ++ ". Indo para " ++ show i ++ " " ++ show (j+1) ++ " com board:\n\n" ++ show (insertCellBoard board (Initial v r) i j []) ++ "\n\n" ++ "e alternatives:\n\n" ++ show (insertCellBoard alternativeBoard (removeFromPossible (board!!i!!j) v) i j []) ++ "\n\n") solveBoard (insertCellBoard board (Initial v r) i j []) ys i (j+1) (insertCellBoard alternativeBoard (removeFromPossible (board!!i!!j) v) i j []) -- inserimos e salvamos o board alternativo com os outros valores possiveis
+                                                                                                else trace("##Adicionando " ++ show v ++ " em " ++ show i ++ " " ++ show j ++ ". Indo para " ++ show (i+1) ++ " " ++ show 0) solveBoard (insertCellBoard board (Initial v r) i j []) (primeiro (drop (i+1) board)) (i+1) 0 (insertCellBoard alternativeBoard (removeFromPossible (board!!i!!j) v) i j []) -- mesma coisa mas pulamos a linha
+                                                               | otherwise = trace("##Nao consegui inserir " ++ show v ++ " em " ++ show i ++ " " ++ show j ++ "! Tentando " ++ show vs ++ " com board:\n\n " ++ show board ++ "\n\n") solveBoard board ((Possible (vs) r):ys) i j alternativeBoard -- nao podemos inserir, tentamos com o proximo valor possivel
                                                                 where 
                                                                     primeiro xs | countLines xs == 0 = []
                                                                                 | otherwise = head xs
@@ -205,7 +191,43 @@ solveBoard board ((Initial v r):xs) i j alternativeBoard | j < countLines board 
                                                          where 
                                                              primeiro xs | countLines xs == 0 = []
                                                                          | otherwise = head xs
+                                                                         
+                                                                         
+traceBack :: Board -> Int -> Int -> Board -> Board
+traceBack board i j alternatives | j > 0 = if alternatives!!i!!j /= board!!i!!j
+                                            then trace ("#!!!!!!#Retornando do trace com " ++ show i ++ " " ++ show j ++ " para j > 0 com board novo:\n\n" ++ show (updatedBoard i j) ++ "\n\n") updatedBoard i j
+                                            else trace ("#!!!!!!#Voltando no traceback para " ++ show i ++ " " ++ show (j-1)) traceBack board i (j-1) alternatives
+                                 | otherwise =  if alternatives!!i!!j /= board!!i!!j
+                                            then trace ("#!!!!!!#Retornando do trace com " ++ show i ++ " " ++ show j ++ " e com resultado:\n\n" ++ show (updatedBoard i j) ++ "\n\n") updatedBoard i j
+                                            else trace ("#!!!!!!#Voltando no traceback para " ++ show (i-1) ++ " " ++ show max) traceBack board (i-1) max alternatives 
+                                        where
+                                            updatedBoard x y = (insertCellBoard board (alternatives!!x!!y) x y [])
+                                            max = countLines board -1
+--     then 
+-- -- TODO: 
+-- -- * Documentacao
+-- trySolve :: Board -> Row -> Int -> Int -> Board -> Board
+-- trySolve board [] _ _ _ = trace ("Im doone? ") board
+-- trySolve board ((Possible (v:vs) r):[]) i j alternatives | checkSafeInsert board v i j = if i < max 
+--                                                                 then trace ("Inserindo " ++ show v ++ " em " ++ show i ++ " " ++ show j ++ ". Indo para " ++ show (i+1) ++ " " ++ show 0)  trySolve (insertCellBoard board (Initial v r) i j []) (board!!(i+1)) (i+1) 0 (insertCellBoard alternatives (removeFromPossible (board!!i!!j) v) i j [])
+--                                                                 else (insertCellBoard board (Initial v r) i j [])
+--                                                          | otherwise = trace ("Nao inseri " ++ show v ++ " em " ++ show i ++ " " ++ show j ++". Vou tentar " ++ show vs) trySolve board ((Possible vs r):[]) i j alternatives
+--                                                             where
+--                                                                 max = (countLines board) -1
 
+-- trySolve board ((Possible (v:vs) r):ys) i j alternatives | checkSafeInsert board v i j = trace ("inserindo " ++ show v ++ " em " ++ show i ++ " " ++ show j ++ ". Indo para " ++ show i ++ " " ++ show (j+1)) trySolve (insertCellBoard board (Initial v r) i j []) ys i (j+1) (insertCellBoard alternatives (removeFromPossible (board!!i!!j) v) i j [])
+--                                                          | otherwise = trace ("nao inseri " ++ show v ++ " em " ++ show i ++ " " ++ show j ++". Vou tentar " ++ show vs) trySolve board ((Possible vs r):ys) i j alternatives
+-- trySolve board ((Possible [] r):ys) i j alternatives | j > 0 = trace ("Sem opcao de insercao! Voltando para " ++ show i ++ " " ++ show (j-1) ++ " com board: " ++ show (insertCellBoard board a (i-1) max [])) trySolve (insertCellBoard board a i (j-1) []) (drop (j-1) (insertCellBoard board a i (j-1) [])!!i) i (j-1) as
+--                                                | otherwise = trace ("here3alt") trySolve (insertCellBoard board a (i-1) max []) (drop max (insertCellBoard board a (i-1) max [])!!i) (i-1) max as
+--                                                     where
+--                                                         max = (countLines board) -1
+
+-- trySolve board ((Initial v r):ys) i j alternatives | trace ("here4") j < countLines board -1 = trySolve board ys i (j+1) alternatives -- pulamos initials
+--                                                    | j == countLines board -1 && i == countLines board -1 = board
+--                                                    | trace ("here4alt") otherwise = trySolve board (primeiro (drop (i+1) board)) (i+1) 0 alternatives
+--                                                          where 
+--                                                              primeiro xs | countLines xs == 0 = []
+--                                                                          | otherwise = head xs
 
 {-- adiciona a celula na coluna i da linha Row --}
 insertCellRow :: Row -> Cell -> Int -> Row -> Row

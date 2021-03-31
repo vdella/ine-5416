@@ -35,11 +35,104 @@
   (setq row (point-i actual))
 
   (cond
-    ((= 0 row) (in-row (+ row 1) brd 0))
-    ((= (- 5 1) row) (in-row (- row 1) brd 0))
-    (t (concat-lists (in-row (+ row 1) brd 0) (in-row (- row 1) brd 0)))
+    ((= 0 row) 
+      (in-row (+ row 1) brd 0)
+    )
+    ((= (- 5 1) row) 
+      (in-row (- row 1) brd 0)
+    )
+    (t 
+      (append (in-row (+ row 1) brd 0) (in-row (- row 1) brd 0))
+    )
   )
 )
+
+
+(defun adj-col (i brd)
+  (defun operator (i j)
+    (cond
+      ((< (- i 1) 0)
+        (cond
+          ((> (+ j 1) (- 5 1))
+            (write-line "AAAA")
+            (append
+              (nth (point-to-i (+ i 1) j) board)
+              (nth (point-to-i (+ i 1) (- j 1)) board)
+            )
+          )
+          ((< (- j 1) 0)
+            (append
+              (nth (point-to-i (+ i 1) j) board)
+              (nth (point-to-i (+ i 1) (+ j 1)) board)
+            )
+          )
+          (t 
+            (append
+              (nth (point-to-i (+ i 1) j) board)
+              (nth (point-to-i (+ i 1) (+ j 1)) board)
+              (nth (point-to-i (+ i 1) (- j 1)) board)
+            )
+          )
+        )
+      )
+      ((> (+ i 1) (- 5 1))
+        (cond
+          ((> (+ j 1) (- 5 1))
+            (append
+              (nth (point-to-i (- i 1) j) board)
+              (nth (point-to-i (- i 1) (- j 1)) board)
+            )
+          )
+          ((< (- j 1) 0)
+            (append
+              (nth (point-to-i (- i 1) j) board)
+              (nth (point-to-i (- i 1) (+ j 1)) board)
+            )
+          )
+          (t 
+            (append
+              (nth (point-to-i (- i 1) j) board)
+              (nth (point-to-i (- i 1) (+ j 1)) board)
+              (nth (point-to-i (- i 1) (- j 1)) board)
+            )
+          )
+        )
+      )
+      ((< (- j 1) 0)
+        (append
+              (nth (point-to-i (+ i 1) j) board)
+              (nth (point-to-i (+ i 1) (+ j 1)) board)
+              (nth (point-to-i (- i 1) j) board)
+              (nth (point-to-i (- i 1) (+ j 1)) board)
+        )
+      )
+      ((> (+ j 1) (- 5 1))
+        (append
+              (nth (point-to-i (+ i 1) j) board)
+              (nth (point-to-i (+ i 1) (- j 1)) board)
+              (nth (point-to-i (- i 1) j) board)
+              (nth (point-to-i (- i 1) (- j 1)) board)
+        )
+      )
+      (t 
+        (append
+              (nth (point-to-i (+ i 1) j) board)
+              (nth (point-to-i (- i 1) j) board)
+              (nth (point-to-i (+ i 1) (+ j 1)) board)
+              (nth (point-to-i (+ i 1) (- j 1)) board)
+              (nth (point-to-i (- i 1) (+ j 1)) board)
+              (nth (point-to-i (- i 1) (- j 1)) board)
+        )
+      )
+    )
+  )
+
+  (setq actual (i-to-point i))
+  (setq row (point-i actual))
+  (setq col (point-j actual))
+  (operator row col)
+)
+
 
 ; Retorna uma lista de valores na regiao dada
 ; r = regiao
@@ -115,12 +208,6 @@
   )
 ) 
 
-(defun concat-lists (seq1 seq2)
-  (if (null seq1)
-      seq2
-      (cons (car seq1) (concat-lists (cdr seq1) seq2)))
-)
-
 ; Retorna o indice da proxima celula vazia 
 (defun next-possible (brd)
   (if (= 0 (car brd))
@@ -150,12 +237,11 @@
     (write-line (write-to-string (remove-val '(2 1 0 3 9 4 3) '(2 3 9 3))))
     (write-line (write-to-string (next-possible board)))
     (write-line (write-to-string (reverse-range 7))))
-    (write-line "AAAA")
     (write-line (write-to-string (region-board)))
     (write-line (write-to-string (in-row 3 board 0)))
     (write-line "linhas adjacentes")
     (write-line (write-to-string (adj-row 7 board)))
-    
+    (write-line (write-to-string (adj-col 2 board)))
 
 (main)
 

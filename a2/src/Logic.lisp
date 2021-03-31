@@ -57,6 +57,19 @@
     (t (removeVal (removeAll (car lista2) lista1) (cdr lista2)))))
 
 
+;; Retorna o indice da proxima celula vazia 
+(defun nextPossible (brd)
+  (if (= 0 (car brd))
+    0
+    (+ 1 (nextPossible (cdr brd)))))
+
+
+;; Cria uma lista nova com valores de 1 a n em reverso
+(defun nlist (n)
+  (if (<= n 0)
+    '()
+    (cons n (nlist (- n 1)))))
+
 (defun main()
   ;; nth n list = retorna o n elemento da lista.
   (write-line (write-to-string (nth 4 board)))
@@ -68,7 +81,10 @@
   (write-line (write-to-string (inRegion 4 regions board)))
   (write-line (write-to-string (regionLength 1)))
   (write-line (write-to-string (removeAll 3 '(2 1 0 3 9 4 3))))
-  (write-line (write-to-string (removeVal '(2 1 0 3 9 4 3) '(2 3 9 3)))))
+  (write-line (write-to-string (removeVal '(2 1 0 3 9 4 3) '(2 3 9 3))))
+  (write-line (write-to-string (nextPossible board)))
+  (write-line (write-to-string (nlist 7))))
+
 
 (main)
 

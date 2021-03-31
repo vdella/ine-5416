@@ -87,6 +87,33 @@
     )
 )
 
+
+;; Retorna uma lista com os valores adjacentes ao indice i. Cnt serve como contador e deve comecar em 0
+(defun adjRow (i brd)
+  (setq actual (itopoint i))
+  (setq row (point-i actual))
+
+  (cond
+    ((= 0 row) (inrow (+ row 1) brd 0))
+    ((= (- 5 1) row) (inrow (- row 1) brd 0))
+    (t (concat-lists (inrow (+ row 1) brd 0) (inrow (- row 1) brd 0)))))
+
+
+
+;; Retorna a linha row, busca a partir de v (deve ser 0)
+(defun inrow (row brd v)
+  (setq actual (itopoint v))
+
+  (cond
+    ((> (point-i actual) row) '())     ;; passamos do indice i
+    ((= (point-i actual) row) (cons (car brd) (inrow row (cdr brd) (+ 1 v))))
+    (t (inrow row (cdr brd) (+ 1 v))))) 
+
+(defun concat-lists (seq1 seq2)
+  (if (null seq1)
+      seq2
+      (cons (car seq1) (concat-lists (cdr seq1) seq2))))
+
 ; Retorna o indice da proxima celula vazia 
 (defun nextPossible (brd)
   (if (= 0 (car brd))
@@ -101,8 +128,6 @@
     (cons n (nlist (- n 1)))))
 
 (defun main()
-    ; nth n list = retorna o n elemento da lista.
-    (write-line (write-to-string (nth 4 board)))
     (write-line "Convertendo 7 para i e j")
     (write-line (write-to-string (itopoint 11)))
     (setq pnt (itopoint 14))
@@ -116,6 +141,10 @@
     (write-line (write-to-string (nlist 7))))
     (write-line "AAAA")
     (write-line (write-to-string (region-board)))
+    (write-line (write-to-string (inrow 3 board 0)))
+    (write-line "linhas adjacentes")
+    (write-line (write-to-string (adjRow 7 board)))
+    
 
 (main)
 

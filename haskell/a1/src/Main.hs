@@ -19,5 +19,5 @@ main = do
   putStrLn "Tabuleiro resolvido: "
   putStrLn (printBoard solvedBoard max)  -- Tabuleiro resolvido.
 
-  print (length solvedBoard)
+  -- print (length solvedBoard)
   

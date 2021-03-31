@@ -70,8 +70,8 @@
             (progn 
                 (setq max-length (nth i regions))
                 (setq to-be-filled ())
-                (setq to-removed (create-list-in-range to-be-filled 1 max-length))
-                ; TODO needs to 
+                (setq to-remove (create-list-in-range to-be-filled 1 max-length))
+                ; TODO needs to remove values from to-remove list.
             )
         )
     )

@@ -37,8 +37,8 @@
 
 
 ;; Retorna o tamanho da regiao
-(defun regionLength (r)
-  (length (inRegion r regions board)))
+(defun regionLength (r rgns brd)
+  (length (inRegion r rgns brd)))
 
 
 ;; Remove da lista todas as ocorrencias de um dado valor
@@ -70,6 +70,7 @@
     '()
     (cons n (nlist (- n 1)))))
 
+
 (defun main()
   ;; nth n list = retorna o n elemento da lista.
   (write-line (write-to-string (nth 4 board)))
@@ -79,10 +80,10 @@
   (write-line (write-to-string pnt))
   (write-line (write-to-string (pointoi pnt)))
   (write-line (write-to-string (inRegion 4 regions board)))
-  (write-line (write-to-string (regionLength 1)))
   (write-line (write-to-string (removeAll 3 '(2 1 0 3 9 4 3))))
   (write-line (write-to-string (removeVal '(2 1 0 3 9 4 3) '(2 3 9 3))))
   (write-line (write-to-string (nextPossible board)))
+  (write-line (write-to-string (regionLength 1 regions board)))
   (write-line (write-to-string (nlist 7))))
 
 

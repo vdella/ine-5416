@@ -40,17 +40,17 @@
 
   (cond
     ((= 0 row) 
-      (append (adj-from-i i (in-row (+ row 1) brd 0) 0) 
-              (adj-from-i i (in-row row brd 0) 0))
+      (append (adj-from-i i (in-row (+ row 1) brd 0) 0) ; Adjacentes da linha abaixo
+              (adj-from-i i (in-row row brd 0) 0))      ; Adjacentes da mesma linha (inclui i)
     )
     ((= (- 5 1) row) 
-      (append (adj-from-i i (in-row (- row 1) brd 0) 0) 
-              (adj-from-i i (in-row row brd 0) 0))
+      (append (adj-from-i i (in-row (- row 1) brd 0) 0) ; Adjacentes da linha acima
+              (adj-from-i i (in-row row brd 0) 0))      ; Adjacentes da mesma linha (inclui i)
     )
     (t 
-      (append (adj-from-i i (in-row (+ row 1) brd 0) 0) 
-              (adj-from-i i (in-row (- row 1) brd 0) 0)
-              (adj-from-i i (in-row row brd 0) 0))
+      (append (adj-from-i i (in-row (+ row 1) brd 0) 0) ; Adjacentes da linha abaixo
+              (adj-from-i i (in-row (- row 1) brd 0) 0) ; Adjacentes da linha acima
+              (adj-from-i i (in-row row brd 0) 0))      ; Adjacentes da mesma linha
     )
   )
 )
@@ -167,8 +167,8 @@
 
 
 ; Retorna o tamanho da regiao
-(defun region-length (r)
-  (length (in-region r regions board))
+(defun region-length (r rgns brd)
+  (length (in-region r rgns brd))
 )
 
 
@@ -191,22 +191,6 @@
   )
 )
 
-
-(defun possibles-at (i brd)
-    (write-line (write-to-string i))
-    (if (> i 24)
-        ()  ; Retorna uma lista vazia, indicando index out of bounds.
-        (if (/= (nth i brd) 0)
-            (cons (nth i brd))
-            (progn 
-                (setq max (nth i regions))
-                (setq to-remove (inclusive-range max))
-                ; TODO needs to remove values from to-remove list.
-                ; TODO still needs helper functions.
-            )
-        )
-    )
-)
 
 ; Cria uma lista de 1 até 'max'. No caso, adicionar o valor 'min' é
 ; opcional e este será interpretado como 1 por padrão. Itera
@@ -244,6 +228,17 @@
   )
 )
 
+; Retorna a lista de valores possiveis no indice i
+(defun possibles-at (i rgns brd)
+  (setq used-values (append (adj-row i brd) (in-region (nth i rgns) rgns brd)))
+  (setq r-length (region-length (nth i rgns) rgns brd))
+  (write-line (write-to-string r-length))
+  (cond
+    ((> i (length brd)) '())
+    ((= 0 (nth i brd)) (remove-val (reverse-range r-length) used-values))
+    (t (nth i brd))))
+
+
 (defun main()
     ; (write-line "Convertendo 7 para i e j")
     ; (write-line (write-to-string (i-to-point 11)))
@@ -264,8 +259,8 @@
     (write-line "AAAA")
     (write-line (write-to-string (adj-col 1 board)))
     (write-line (write-to-string (adj-col 7 board)))
+    (write-line (write-to-string (possibles-at 0 regions board)))
     (setq adj (adj-row 20 board))
 )
-
 (main)
 

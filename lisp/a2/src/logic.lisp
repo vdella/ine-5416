@@ -29,6 +29,10 @@
   (+ (point-j pnt) (* (point-i pnt) 5))
 )
 
+(defun point-to-i-from (i j)
+  (+ j (* i 5))
+)
+
 ; Retorna uma lista com os valores adjacentes ao índice i. Cnt serve como contador e deve comecar em 0
 (defun adj-row (i brd)
   (setq actual (i-to-point i))
@@ -54,23 +58,22 @@
       ((< (- i 1) 0)
         (cond
           ((> (+ j 1) (- 5 1))
-            (write-line "AAAA")
-            (append
-              (nth (point-to-i (+ i 1) j) board)
-              (nth (point-to-i (+ i 1) (- j 1)) board)
+            (list
+              (nth (point-to-i-from (+ i 1) j) board)
+              (nth (point-to-i-from (+ i 1) (- j 1)) board)
             )
           )
           ((< (- j 1) 0)
-            (append
-              (nth (point-to-i (+ i 1) j) board)
-              (nth (point-to-i (+ i 1) (+ j 1)) board)
+            (list
+              (nth (point-to-i-from (+ i 1) j) board)
+              (nth (point-to-i-from (+ i 1) (+ j 1)) board)
             )
           )
           (t 
-            (append
-              (nth (point-to-i (+ i 1) j) board)
-              (nth (point-to-i (+ i 1) (+ j 1)) board)
-              (nth (point-to-i (+ i 1) (- j 1)) board)
+            (list
+              (nth (point-to-i-from (+ i 1) j) board)
+              (nth (point-to-i-from (+ i 1) (+ j 1)) board)
+              (nth (point-to-i-from (+ i 1) (- j 1)) board)
             )
           )
         )
@@ -78,50 +81,50 @@
       ((> (+ i 1) (- 5 1))
         (cond
           ((> (+ j 1) (- 5 1))
-            (append
-              (nth (point-to-i (- i 1) j) board)
-              (nth (point-to-i (- i 1) (- j 1)) board)
+            (list
+              (nth (point-to-i-from (- i 1) j) board)
+              (nth (point-to-i-from (- i 1) (- j 1)) board)
             )
           )
           ((< (- j 1) 0)
-            (append
-              (nth (point-to-i (- i 1) j) board)
-              (nth (point-to-i (- i 1) (+ j 1)) board)
+            (list
+              (nth (point-to-i-from (- i 1) j) board)
+              (nth (point-to-i-from (- i 1) (+ j 1)) board)
             )
           )
           (t 
-            (append
-              (nth (point-to-i (- i 1) j) board)
-              (nth (point-to-i (- i 1) (+ j 1)) board)
-              (nth (point-to-i (- i 1) (- j 1)) board)
+            (list
+              (nth (point-to-i-from (- i 1) j) board)
+              (nth (point-to-i-from (- i 1) (+ j 1)) board)
+              (nth (point-to-i-from (- i 1) (- j 1)) board)
             )
           )
         )
       )
       ((< (- j 1) 0)
-        (append
-              (nth (point-to-i (+ i 1) j) board)
-              (nth (point-to-i (+ i 1) (+ j 1)) board)
-              (nth (point-to-i (- i 1) j) board)
-              (nth (point-to-i (- i 1) (+ j 1)) board)
+        (list
+              (nth (point-to-i-from (+ i 1) j) board)
+              (nth (point-to-i-from (+ i 1) (+ j 1)) board)
+              (nth (point-to-i-from (- i 1) j) board)
+              (nth (point-to-i-from (- i 1) (+ j 1)) board)
         )
       )
       ((> (+ j 1) (- 5 1))
-        (append
-              (nth (point-to-i (+ i 1) j) board)
-              (nth (point-to-i (+ i 1) (- j 1)) board)
-              (nth (point-to-i (- i 1) j) board)
-              (nth (point-to-i (- i 1) (- j 1)) board)
+        (list
+              (nth (point-to-i-from (+ i 1) j) board)
+              (nth (point-to-i-from (+ i 1) (- j 1)) board)
+              (nth (point-to-i-from (- i 1) j) board)
+              (nth (point-to-i-from (- i 1) (- j 1)) board)
         )
       )
       (t 
-        (append
-              (nth (point-to-i (+ i 1) j) board)
-              (nth (point-to-i (- i 1) j) board)
-              (nth (point-to-i (+ i 1) (+ j 1)) board)
-              (nth (point-to-i (+ i 1) (- j 1)) board)
-              (nth (point-to-i (- i 1) (+ j 1)) board)
-              (nth (point-to-i (- i 1) (- j 1)) board)
+        (list
+              (nth (point-to-i-from (+ i 1) j) board)
+              (nth (point-to-i-from (- i 1) j) board)
+              (nth (point-to-i-from (+ i 1) (+ j 1)) board)
+              (nth (point-to-i-from (+ i 1) (- j 1)) board)
+              (nth (point-to-i-from (- i 1) (+ j 1)) board)
+              (nth (point-to-i-from (- i 1) (- j 1)) board)
         )
       )
     )
@@ -226,22 +229,25 @@
 )
 
 (defun main()
-    (write-line "Convertendo 7 para i e j")
-    (write-line (write-to-string (i-to-point 11)))
-    (setq pnt (i-to-point 14))
-    (write-line (write-to-string pnt))
-    (write-line (write-to-string (point-to-i pnt)))
-    (write-line (write-to-string (in-region 4 regions board)))
-    (write-line (write-to-string (region-length 1)))
-    (write-line (write-to-string (remove-all 3 '(2 1 0 3 9 4 3))))
-    (write-line (write-to-string (remove-val '(2 1 0 3 9 4 3) '(2 3 9 3))))
-    (write-line (write-to-string (next-possible board)))
-    (write-line (write-to-string (reverse-range 7))))
-    (write-line (write-to-string (region-board)))
-    (write-line (write-to-string (in-row 3 board 0)))
+    ; (write-line "Convertendo 7 para i e j")
+    ; (write-line (write-to-string (i-to-point 11)))
+    ; (setq pnt (i-to-point 14))
+    ; (write-line (write-to-string pnt))
+    ; (write-line (write-to-string (point-to-i pnt)))
+    ; (write-line (write-to-string (in-region 4 regions board)))
+    ; (write-line (write-to-string (region-length 1)))
+    ; (write-line (write-to-string (remove-all 3 '(2 1 0 3 9 4 3))))
+    ; (write-line (write-to-string (remove-val '(2 1 0 3 9 4 3) '(2 3 9 3))))
+    ; (write-line (write-to-string (next-possible board)))
+    ; (write-line (write-to-string (reverse-range 7))))
+    ; (write-line (write-to-string (region-board)))
+    ; (write-line (write-to-string (in-row 3 board 0)))
     (write-line "linhas adjacentes")
     (write-line (write-to-string (adj-row 7 board)))
-    (write-line (write-to-string (adj-col 2 board)))
+
+    (write-line "AAAA")
+    (write-line (write-to-string (adj-col 1 board)))
+)
 
 (main)
 

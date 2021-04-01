@@ -1,7 +1,7 @@
 (setq board '(0 0 0 0 1
               3 0 0 0 0
               0 0 0 0 0
-              5 0 0 1 0
+              5 0 9 1 9
               0 0 0 4 0))
 
 (setq regions '(1 1 2 2 2
@@ -40,16 +40,32 @@
 
   (cond
     ((= 0 row) 
-      (in-row (+ row 1) brd 0)
+      (append (adj-from-i i (in-row (+ row 1) brd 0) 0) 
+              (adj-from-i i (in-row row brd 0) 0))
     )
     ((= (- 5 1) row) 
-      (in-row (- row 1) brd 0)
+      (append (adj-from-i i (in-row (- row 1) brd 0) 0) 
+              (adj-from-i i (in-row row brd 0) 0))
     )
     (t 
-      (append (in-row (+ row 1) brd 0) (in-row (- row 1) brd 0))
+      (append (adj-from-i i (in-row (+ row 1) brd 0) 0) 
+              (adj-from-i i (in-row (- row 1) brd 0) 0)
+              (adj-from-i i (in-row row brd 0) 0))
     )
   )
 )
+
+
+; Dado um indice i (convertido para um ponto (i, j)), uma linha adjacente row e um indice incial (deve ser 0),
+; retorna as celulas adjacentes a (i, j) nessa linha
+(defun adj-from-i (i row start)
+  (setq pnt (i-to-point i))
+  (cond
+    ((null row) '())
+    ((= start (- (point-j pnt) 1)) (cons (car row) (adj-from-i i (cdr row) (+ 1 start))))
+    ((= start (+ (point-j pnt) 1)) (cons (car row) (adj-from-i i (cdr row) (+ 1 start))))
+    ((= start (point-j pnt)) (cons (car row) (adj-from-i i (cdr row) (+ 1 start))))
+    (t (adj-from-i i (cdr row) (+ 1 start)))))
 
 
 (defun adj-col (i brd)
@@ -242,11 +258,13 @@
     ; (write-line (write-to-string (reverse-range 7))))
     ; (write-line (write-to-string (region-board)))
     ; (write-line (write-to-string (in-row 3 board 0)))
-    (write-line "linhas adjacentes")
-    (write-line (write-to-string (adj-row 7 board)))
+    (write-line "celulas adjacentes ao indice 7")
+    (write-line (write-to-string (adj-row 11 board)))
 
     (write-line "AAAA")
     (write-line (write-to-string (adj-col 1 board)))
+    (write-line (write-to-string (adj-col 7 board)))
+    (setq adj (adj-row 20 board))
 )
 
 (main)

@@ -231,6 +231,7 @@
 
 (defun try-insert (i brd value)
     (setf (nth i brd) value)
+    (write-line (write-to-string brd))
     brd
 )
 
@@ -273,14 +274,6 @@
 
 (defun solve-ahead (i rgns brd xs)
   (solve-next rgns (try-insert i brd (car xs))))
-
-
-(defun reference-test (ml)
-  (setq l2 (copy-list ml))
-  (write-line (write-to-string ml))
-  (write-line (write-to-string (try-insert 1 ml 5)))
-  (write-line (write-to-string ml))
-  (write-line (write-to-string l2)))
 
 (defun main()
     (write-line (write-to-string (solve 0 regions board (possibles-at 0 regions board))))

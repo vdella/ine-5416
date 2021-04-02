@@ -243,29 +243,31 @@
   )
 )
 
-(defun solve (i brd x xs)
+(defun solve (i rgns brd xs)
 
     (defun solve-next (i brd)
-        solve (next-possible brd) brd (possibles-at i regions brd)
+        (solve (next-possible brd) rgns brd (possibles-at i rgns brd))
     )
 
     (defun solve-ahead ()
-        (solve-next i (try-insert i brd x))
+        (solve-next i (try-insert i brd (car xs)))
     )
+
+    (write-line (write-to-string brd))
 
     (cond
         ((= i (- 25 1))
             (cond 
-                ((null (list x xs)) or (not (null (list x)))
+                ((null xs) or (not (null (car xs)))
                     ()
                 )
-                ((null xs)
-                    try-insert i brd x
+                ((null (cdr xs))
+                    (try-insert i brd (car xs))
                 )
             )
         )
-        ((null solve-ahead)
-            solve i brd xs
+        ((null (solve-ahead))
+            (solve i rgns brd xs)
         )
         (t (solve-ahead))
     )
@@ -302,6 +304,7 @@
 
     ; (adj-from-i 1 (in-row (+ row 1) brd 0) 0)
     ; (adj-from-i 1 (in-row (+ row 1) brd 0) 0)
+    (write-line (write-to-string (solve 0 regions board (possibles-at 0 regions board))))
 )
 (main)
 

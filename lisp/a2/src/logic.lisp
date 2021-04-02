@@ -245,65 +245,29 @@
 
 (defun solve (i rgns brd xs)
 
-    (defun solve-next (i brd)
-        (solve (next-possible brd) rgns brd (possibles-at i rgns brd))
-    )
+  (defun solve-next (j bd)
+    (setq next-i (next-possible bd))
+    (solve next-i rgns bd (possibles-at next-i rgns bd)))
 
-    (defun solve-ahead ()
-        (solve-next i (try-insert i brd (car xs)))
-    )
+  (defun solve-ahead ()
+    (solve-next i (try-insert i brd (car xs))))
 
-    (write-line (write-to-string brd))
+  (write-line (write-to-string brd))
 
-    (cond
-        ((= i (- 25 1))
-            (cond 
-                ((null xs) or (not (null (car xs)))
-                    ()
-                )
-                ((null (cdr xs))
-                    (try-insert i brd (car xs))
-                )
-            )
-        )
-        ((null (solve-ahead))
-            (solve i rgns brd xs)
-        )
-        (t (solve-ahead))
-    )
-)
+  (cond
+    ((null xs) '())
+
+    ((= i (- 25 1)) (cond
+                      ((null xs) '())
+                      ((null (cdr xs)) (try-insert i brd (car xs)))
+                      ((not (null (car xs))) '())))
+
+    ((null (solve-ahead)) (solve i rgns brd (cdr xs)))
+
+    (t (solve-ahead))))
+
 
 (defun main()
-    ; (write-line "Convertendo 7 para i e j")
-    ; (write-line (write-to-string (i-to-point 11)))
-    (setq pnt (i-to-point 17))
-    ; (write-line (write-to-string pnt))
-    ; (write-line (write-to-string (point-to-i pnt)))
-    ; (write-line (write-to-string (in-region 4 regions board)))
-    ; (write-line (write-to-string (region-length 1)))
-    ; (write-line (write-to-string (remove-all 3 '(2 1 0 3 9 4 3))))
-    ; (write-line (write-to-string (remove-val '(2 1 0 3 9 4 3) '(2 3 9 3))))
-    ; (write-line (write-to-string (next-possible board)))
-    ; (write-line (write-to-string (reverse-range 7))))
-    ; (write-line (write-to-string (region-board)))
-    ; (write-line (write-to-string (in-row 3 board 0)))
-    ; (write-line "celulas adjacentes ao indice 7")
-    (write-line (write-to-string (adj-row 11 board)))
-
-    ; (write-line "AAAA")
-    (write-line (write-to-string (adj-col 1 board)))
-    (write-line (write-to-string (adj-col 7 board)))
-    (write-line "AAAA")
-    (write-line (write-to-string (possibles-at 18 regions board)))
-
-    (setq row (point-i pnt))
-
-    ; (write-line (write-to-string (adj-from-i 1 row 0)))
-    ; (write-line (write-to-string (adj-from-i 7 row 0)))
-    ; (setq adj (adj-row 20 board))
-
-    ; (adj-from-i 1 (in-row (+ row 1) brd 0) 0)
-    ; (adj-from-i 1 (in-row (+ row 1) brd 0) 0)
     (write-line (write-to-string (solve 0 regions board (possibles-at 0 regions board))))
 )
 (main)

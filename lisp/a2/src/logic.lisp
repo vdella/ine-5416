@@ -244,31 +244,47 @@
 )
 
 (defun solve (i rgns brd xs)
-
-  (defun solve-next (j bd)
-    (setq next-i (next-possible bd))
-    (solve next-i rgns bd (possibles-at next-i rgns bd)))
-
-  (defun solve-ahead ()
-    (solve-next i (try-insert i brd (car xs))))
+  (setq my-board (copy-list brd))
 
   (write-line (write-to-string brd))
+  (write-line "##")
+  (write-line (write-to-string i))
+  (write-line "##")
+  (write-line (write-to-string xs))
+  (write-line "  ")
 
   (cond
     ((null xs) '())
 
     ((= i (- 25 1)) (cond
                       ((null xs) '())
-                      ((null (cdr xs)) (try-insert i brd (car xs)))
+                      ((null (cdr xs)) (try-insert i my-board (car xs)))
                       ((not (null (car xs))) '())))
 
-    ((null (solve-ahead)) (solve i rgns brd (cdr xs)))
+    ((null (solve-ahead i rgns my-board xs)) (solve i rgns brd (cdr xs)))
 
-    (t (solve-ahead))))
+    (t (solve-ahead i rgns my-board xs))))
 
+
+(defun solve-next (rgns brd)
+  (setq next-i (next-possible brd))
+  (solve next-i rgns brd (possibles-at next-i rgns brd)))
+
+
+(defun solve-ahead (i rgns brd xs)
+  (solve-next rgns (try-insert i brd (car xs))))
+
+
+(defun reference-test (ml)
+  (setq l2 (copy-list ml))
+  (write-line (write-to-string ml))
+  (write-line (write-to-string (try-insert 1 ml 5)))
+  (write-line (write-to-string ml))
+  (write-line (write-to-string l2)))
 
 (defun main()
     (write-line (write-to-string (solve 0 regions board (possibles-at 0 regions board))))
 )
+
 (main)
 

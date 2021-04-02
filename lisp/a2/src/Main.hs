@@ -21,6 +21,7 @@ main = do
 
   print (length solvedBoard)
 
+  print (solveBoard max board)
 
   print (adjCol 1 max board)
   

@@ -1,7 +1,8 @@
 module Logic where
 
 import Types ( Cell(..), Board )
-import Debug.Trace ()
+import Debug.Trace (trace)
+import Parsing
 
 -- Converte um índice i em um par (i,j), indicando linha e coluna, respectivamente, no tabuleiro.
 itopoint :: Int -> Int -> (Int, Int)
@@ -116,8 +117,8 @@ solve i max board (x:xs) | i == length board -1 && null (x:xs) = []
                          | i == length board -1 && not (null [x]) = []
                          | null solvedAhead = solve i max board xs
                          | otherwise = solvedAhead
-                         where solveNext i board = solve (nextPossible i board) max board (possiblesAt (nextPossible i board) max board)
-                               solvedAhead = solveNext i (tryInsert i board (Initial x region))
+                         where solveNext i board = (trace (printBoard board 0)) solve (nextPossible i board) max board (possiblesAt (nextPossible i board) max board)
+                               solvedAhead = (trace (printBoard board 0)) solveNext i (tryInsert i board (Initial x region))
                                region = cellRegion (board!!i)
 
 -- Chama a função responsável pela resolução do tabuleiro.

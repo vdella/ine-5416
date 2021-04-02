@@ -243,6 +243,34 @@
   )
 )
 
+(defun solve (i brd x xs)
+
+    (defun solve-next (i brd)
+        solve (next-possible brd) brd (possibles-at i regions brd)
+    )
+
+    (defun solve-ahead ()
+        (solve-next i (try-insert i brd x))
+    )
+
+    (cond
+        ((= i (- 25 1))
+            (cond 
+                ((null (list x xs)) or (not (null (list x)))
+                    ()
+                )
+                ((null xs)
+                    try-insert i brd x
+                )
+            )
+        )
+        ((null solve-ahead)
+            solve i brd xs
+        )
+        (t (solve-ahead))
+    )
+)
+
 (defun main()
     ; (write-line "Convertendo 7 para i e j")
     ; (write-line (write-to-string (i-to-point 11)))

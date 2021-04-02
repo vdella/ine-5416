@@ -82,7 +82,7 @@ removeVal [] _ = []
 removeVal xs [] = xs
 removeVal xs (y:ys) = removeVal (removeAll y xs) ys
 
--- Remove da lista todas as ocorr6encias de um dado valor.
+-- Remove da lista todas as ocorrências de um dado valor.
 removeAll :: Int -> [Int] -> [Int]
 removeAll _ [] = []
 removeAll y (x:xs) | x == y = removeAll y xs

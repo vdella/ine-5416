@@ -211,15 +211,6 @@
   )
 ) 
 
-; Retorna o indice da proxima celula vazia 
-(defun next-possible (brd)
-  (if (= 0 (car brd))
-    0
-    (+ 1 (next-possible (cdr brd)))
-  )
-)
-
-
 ; Cria uma lista nova com valores de 1 a n em reverso
 (defun reverse-range (n)
   (if (<= n 0)
@@ -232,17 +223,30 @@
 (defun possibles-at (i rgns brd)
   (setq used-values (append (adj-row i brd) (in-region (nth i rgns) rgns brd)))
   (setq r-length (region-length (nth i rgns) rgns brd))
-  (write-line (write-to-string r-length))
+  ; (write-line (write-to-string r-length))
   (cond
     ((> i (length brd)) '())
     ((= 0 (nth i brd)) (remove-val (reverse-range r-length) used-values))
     (t (nth i brd))))
 
+(defun try-insert (i brd value)
+    (setf (nth i brd) value)
+    brd
+)
+
+
+; Retorna o indice da proxima celula vazia 
+(defun next-possible (brd)
+  (if (= 0 (car brd))
+    0
+    (+ 1 (next-possible (cdr brd)))
+  )
+)
 
 (defun main()
     ; (write-line "Convertendo 7 para i e j")
     ; (write-line (write-to-string (i-to-point 11)))
-    ; (setq pnt (i-to-point 14))
+    (setq pnt (i-to-point 17))
     ; (write-line (write-to-string pnt))
     ; (write-line (write-to-string (point-to-i pnt)))
     ; (write-line (write-to-string (in-region 4 regions board)))
@@ -253,14 +257,23 @@
     ; (write-line (write-to-string (reverse-range 7))))
     ; (write-line (write-to-string (region-board)))
     ; (write-line (write-to-string (in-row 3 board 0)))
-    (write-line "celulas adjacentes ao indice 7")
+    ; (write-line "celulas adjacentes ao indice 7")
     (write-line (write-to-string (adj-row 11 board)))
 
-    (write-line "AAAA")
+    ; (write-line "AAAA")
     (write-line (write-to-string (adj-col 1 board)))
     (write-line (write-to-string (adj-col 7 board)))
-    (write-line (write-to-string (possibles-at 0 regions board)))
-    (setq adj (adj-row 20 board))
+    (write-line "AAAA")
+    (write-line (write-to-string (possibles-at 18 regions board)))
+
+    (setq row (point-i pnt))
+
+    ; (write-line (write-to-string (adj-from-i 1 row 0)))
+    ; (write-line (write-to-string (adj-from-i 7 row 0)))
+    ; (setq adj (adj-row 20 board))
+
+    ; (adj-from-i 1 (in-row (+ row 1) brd 0) 0)
+    ; (adj-from-i 1 (in-row (+ row 1) brd 0) 0)
 )
 (main)
 

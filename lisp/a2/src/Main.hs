@@ -2,7 +2,7 @@ module Main where
 
 import qualified Data.Char
 import Types ()
-import Logic ( solveBoard )
+import Logic
 import Parsing ( printBoard, readBoard )
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -20,4 +20,7 @@ main = do
   putStrLn (printBoard solvedBoard max)  -- Tabuleiro resolvido.
 
   print (length solvedBoard)
+
+
+  print (adjCol 1 max board)
   

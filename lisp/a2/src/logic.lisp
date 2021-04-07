@@ -231,10 +231,20 @@
 
 (defun try-insert (i brd value)
     (setf (nth i brd) value)
-    (write-line (write-to-string brd))
+    (write-line "###")
+    (write-line "inserting...")
+    (write-line (write-to-string value))
+    (write-line "in position...")
+    (write-line (write-to-string i))
+    (write-line "###")
     brd
 )
 
+(defun insert-try (i brd value start)
+  (cond
+    ((null brd) '())
+    ((= i start) (append (list value) (insert-try i (cdr brd) value (+ 1 start))))
+    (t (append (list (car brd)) (insert-try i (cdr brd) value (+ 1 start))))))
 
 ; Retorna o indice da proxima celula vazia 
 (defun next-possible (brd)
@@ -247,20 +257,17 @@
 (defun solve (i rgns brd xs)
   (setq my-board (copy-list brd))
 
-  (write-line (write-to-string brd))
-  (write-line "##")
+  (write-line "")
+  (write-line "solve on i")
   (write-line (write-to-string i))
-  (write-line "##")
-  (write-line (write-to-string xs))
-  (write-line "  ")
+  (write-line "")
 
   (cond
     ((null xs) '())
 
-    ((= i (- 25 1)) (cond
-                      ((null xs) '())
-                      ((null (cdr xs)) (try-insert i my-board (car xs)))
-                      ((not (null (car xs))) '())))
+    ((and (= i (- 25 1)) (null xs)) '())
+    ((and (= i (- 25 1)) (null (cdr xs))) (try-insert i my-board (car xs)))
+    ((and (= i (- 25 1)) (not (null (car xs)))) '())
 
     ((null (solve-ahead i rgns my-board xs)) (solve i rgns brd (cdr xs)))
 
@@ -273,10 +280,16 @@
 
 
 (defun solve-ahead (i rgns brd xs)
+  (write-line "solve-ahead")
+  (write-line "i")
+  (write-line (write-to-string i))
+  (write-line "")
   (solve-next rgns (try-insert i brd (car xs))))
 
 (defun main()
-    (write-line (write-to-string (solve 0 regions board (possibles-at 0 regions board))))
+  (setq solved-board (solve 0 regions board (possibles-at 0 regions board)))
+  (write-line (write-to-string solved-board))
+  ;(write-line (write-to-string (solve 0 regions board (possibles-at 0 regions board))))
 )
 
 (main)

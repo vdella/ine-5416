@@ -250,7 +250,10 @@
     )
 
     (defun solve-ahead ()
-        (solve-next i (try-insert i brd (car xs)))
+        (if (numberp xs)
+          (solve-next i (try-insert i brd xs))
+          (solve-next i (try-insert i brd (car xs)))
+        )
     )
 
     (write-line (write-to-string brd))
@@ -288,13 +291,13 @@
     ; (write-line (write-to-string (region-board)))
     ; (write-line (write-to-string (in-row 3 board 0)))
     ; (write-line "celulas adjacentes ao indice 7")
-    (write-line (write-to-string (adj-row 11 board)))
+    ; (write-line (write-to-string (adj-row 11 board)))
 
+    ; ; (write-line "AAAA")
+    ; (write-line (write-to-string (adj-col 1 board)))
+    ; (write-line (write-to-string (adj-col 7 board)))
     ; (write-line "AAAA")
-    (write-line (write-to-string (adj-col 1 board)))
-    (write-line (write-to-string (adj-col 7 board)))
-    (write-line "AAAA")
-    (write-line (write-to-string (possibles-at 18 regions board)))
+    ; (write-line (write-to-string (possibles-at 18 regions board)))
 
     (setq row (point-i pnt))
 

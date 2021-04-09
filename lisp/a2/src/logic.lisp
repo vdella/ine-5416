@@ -13,6 +13,10 @@
 (defstruct point i j)
 
 
+(defvar max-in-line 5)
+(defvar max-in-board (* max-in-line max-in-line))
+
+
 (defun region-board ()
     regions
 )
@@ -20,17 +24,17 @@
 ; Converte um índice da matriz para um ponto (i, j).
 (defun i-to-point (i)
     (make-point
-        :i (floor (/ i 5))
-        :j (mod i 5)))
+        :i (floor (/ i max-in-line))
+        :j (mod i max-in-line)))
 
 
 ; Converte um ponto para um índice da matriz.
 (defun point-to-i (pnt)
-    (+ (point-j pnt) (* (point-i pnt) 5))
+    (+ (point-j pnt) (* (point-i pnt) max-in-line))
 )
 
 (defun point-to-i-from (i j)
-    (+ j (* i 5))
+    (+ j (* i max-in-line))
 )
 
 ; Retorna uma lista com os valores adjacentes ao índice i. Cnt serve como contador e deve comecar em 0
@@ -44,7 +48,7 @@
                     (adj-from-i i (in-row row brd 0) 0))      ; Adjacentes da mesma linha (inclui i)
         )
 
-        ((= (- 5 1) row) 
+        ((= (- max-in-line 1) row) 
             (append (adj-from-i i (in-row (- row 1) brd 0) 0) ; Adjacentes da linha acima
                     (adj-from-i i (in-row row brd 0) 0))      ; Adjacentes da mesma linha (inclui i)
         )
@@ -226,15 +230,15 @@
             '()
         )
 
-        ((and (= i (- 25 1)) (null xs))
+        ((and (= i (- max-in-board 1)) (null xs))
             '()
         )
 
-        ((and (= i (- 25 1)) (null (cdr xs)))
+        ((and (= i (- max-in-board 1)) (null (cdr xs)))
             (try-insert i my-board (car xs))
         )
 
-        ((and (= i (- 25 1))
+        ((and (= i (- max-in-board 1))
             (not (null (car xs)))) '()
         )
 

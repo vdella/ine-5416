@@ -264,10 +264,43 @@
     (solve-next rgns inserted)
 )
 
+(defun show (brd)
+    (setq it 0)
+    (setq times 0)
+    
+    (defun helper (brd)
+        (cond
+            ((and (/= it (- max-in-line 1)) (not (null (cdr brd))))
+                (write-string (write-to-string (car brd)))
+                (write-string " ")
+                (setq it (+ it 1))
+                (setq it (mod it max-in-line))
+                (setq times (+ times 1))
+                (helper (cdr brd))
+            )
 
-(defun main()
+            ((and (= it (- max-in-line 1)) (not (null (cdr brd))))
+                (write-string (write-to-string (car brd)))
+                (write-string " ")
+                (fresh-line)
+                (setq it (+ it 1))
+                (setq times (+ times 1))
+                (helper (cdr brd))
+            )
+
+            ((= times (- max-in-board 1))
+                (write-string (write-to-string (car brd)))
+            )
+        )
+    )
+    (helper brd)
+)
+
+
+(defun main ()
     (setq solved-board (solve 0 regions board (possibles-at 0 regions board)))
-    (write-line (write-to-string solved-board))
+    ; (write-line (write-to-string solved-board))
+    (show solved-board)
 )
 
 

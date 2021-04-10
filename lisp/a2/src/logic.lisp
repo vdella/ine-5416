@@ -299,7 +299,6 @@
 
 (defun main ()
     (setq solved-board (solve 0 regions board (possibles-at 0 regions board)))
-    ; (write-line (write-to-string solved-board))
     (show solved-board)
 )
 ; ; IO

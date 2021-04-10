@@ -267,7 +267,7 @@
 (defun show (brd)
     (setq it 0)
     (setq times 0)
-    
+
     (defun helper (brd)
         (cond
             ((and (/= it (- max-in-line 1)) (not (null (cdr brd))))
@@ -302,6 +302,43 @@
     ; (write-line (write-to-string solved-board))
     (show solved-board)
 )
+; ; IO
+
+; ; Retorna a linha row do tabuleiro brd como string (ref é um contador e deve ser 0)
+; (defun get-row (row brd rgns ref)
+;   (setq actual (i-to-point ref))
+;   (setq curr-half (concatenate 'string (write-to-string (car brd)) "("))
+;   (setq curr-half2 (concatenate 'string curr-half (write-to-string (car rgns))))
+;   (setq curr (concatenate 'string curr-half2 ") "))
+;   (cond
+;     ((null brd) "")
+;     ((= row (point-i actual)) (concatenate 'string curr (get-row row (cdr brd) (cdr rgns) (+ 1 ref))))
+;     (t (get-row row (cdr brd) (cdr rgns) (+ 1 ref)))))
+
+
+; ; Printa o tabuleiro brd, dado o maximo de linhas lines (cnt é um contador e deve se 0)
+; (defun print-board (brd rgns lines cnt)
+;   (write-line (get-row cnt brd rgns 0))
+;   (cond
+;     ((> cnt lines) ())
+;     (t (print-board brd rgns lines (+ 1 cnt)))))
+
+
+; ; Retorna a linhas do arquivo filename como uma lista de strings
+; (defun get-file (filename)
+;   (with-open-file (stream filename)
+;     (loop for line = (read-line stream nil)
+;           while line
+;           collect line)))
+
+; (defun main()
+;     (setq solved-board (solve 0 regions board (possibles-at 0 regions board)))
+;     (write-line (write-to-string solved-board))
+;     (write-line "")
+;     (print-board solved-board regions 5 0)
+;     (write-line "")
+;     (write-line (write-to-string (get-file "sudoku.txt")))
+; )
 
 
 (main)

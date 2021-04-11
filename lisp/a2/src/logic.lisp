@@ -13,7 +13,7 @@
 (defstruct point i j)
 
 
-(defvar max-in-line 5)  ; Deve ser alterado de acordo com o tamanho da linha de cada matriz dada.
+(defvar max-in-line 5)  ; **Deve ser alterado de acordo com o tamanho da linha de cada matriz dada.**
 (defvar max-in-board (* max-in-line max-in-line))
 
 
@@ -65,7 +65,7 @@
 )
 
 
-; Dado um índice i (convertido para um ponto (i, j)), uma linha adjacente row e um índice inicial (que deve ser 0),
+; Dado um índice i (convertido para um ponto (i, j)), uma linha adjacente row e um índice inicial (que deve ser inicializado em 0),
 ; retornam-se as células adjacentes a (i, j) nesta linha.
 (defun adj-from-i (i row start)
     (setq pnt (i-to-point i))
@@ -160,7 +160,7 @@
 )
 
 
-; Retorna row, busca a partir de v (que deve ser 0).
+; Retorna row, busca a partir de v, o qual deve ser inicializado em 0.
 (defun in-row (row brd v)
     (setq actual (i-to-point v))
 
@@ -188,7 +188,7 @@
 )
 
 
-; Retorna a lista de valores possiveis no índice i.
+; Retorna a lista de valores possiveis a serem inseridos no índice i.
 (defun possibles-at (i rgns brd)
     (setq used-values (append (adj-row i brd) (in-region (nth i rgns) rgns brd)))
     (setq r-length (region-length (nth i rgns) rgns brd))
@@ -208,6 +208,7 @@
 )
 
 
+; Insere value na posição i de brd.
 (defun try-insert (i brd value)
     (setf (nth i brd) value)
     brd
@@ -227,45 +228,55 @@
     (setq my-board (copy-list brd))
     (cond
         ((null xs)
+            ; O tabuleiro atual precisa alterar algum valor já colocado.
             '()
         )
 
         ((and (= i (- max-in-board 1)) (null xs))
+            ; Chegou na última célula e não foi
+            ; encontrada solução na composição atual.
             '()
         )
 
         ((and (= i (- max-in-board 1)) (null (cdr xs)))
+            ; Adiciona-se o único valor possível.
             (try-insert i my-board (car xs))
         )
 
         ((and (= i (- max-in-board 1))
+            ; Chegou-se na última célula e ainda há valores 
+            ; possíveis para serem inseridos.
             (not (null (car xs)))) '()
         )
 
         ((null (solve-ahead i rgns my-board xs))
+            ; Usar o valor atual retornaria uma lista vazia,
+            ; então tenta-se usar outro valor possível.
             (solve i rgns brd (cdr xs))
         )
 
         (t
-            my-board
+            my-board  ; Retorna-se o tabuleiro. 
         )
     )
 )
 
 
+; Tenta adicionar o próximo valor possível em i ao tabuleiro por meio de solve.
 (defun solve-next (rgns brd)
     (setq i (next-possible brd))
     (solve i rgns brd (possibles-at i rgns brd))
 )
 
 
+; Tenta inserir o primeiro valor de xs em i e resolver o tabuleiro.
 (defun solve-ahead (i rgns brd xs)
     (setq inserted (try-insert i brd (car xs)))
     (solve-next rgns inserted)
 )
 
 
-; Retorna a linha row do tabuleiro brd como string (ref é um contador e deve ser 0)
+; Retorna a linha row do tabuleiro brd como string. ref é um contador e deve ser inicializado em 0.
 (defun get-row (row brd rgns ref)
   (setq actual (i-to-point ref))
   (setq curr-half (concatenate 'string (write-to-string (car brd)) "("))
@@ -277,7 +288,7 @@
     (t (get-row row (cdr brd) (cdr rgns) (+ 1 ref)))))
 
 
-; Printa o tabuleiro brd, dado o maximo de linhas lines (cnt é um contador e deve se 0)
+; Apresenta um tabuleiro brd, dado o máximo número de linhas. cnt é um contador e deve ser inicializado em 0.
 (defun print-board (brd rgns lines cnt)
   (write-line (get-row cnt brd rgns 0))
   (cond

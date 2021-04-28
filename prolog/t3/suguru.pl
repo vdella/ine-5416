@@ -9,7 +9,7 @@ tabuleiro(1, [[_, _, _, _, 1],
               [3, 3, 3, 2, 2],
               [6, 3, 4, 4, 4],
               [6, 6, 6, 4, 4],
-              [6, 5, 5, 5, 5]])
+              [6, 5, 5, 5, 5]]).
       
 % WIP
 suguru(Rows) :-
@@ -38,6 +38,13 @@ unico_adjacente([N1, N2, N3 | T1], [N4, N5, N6 | T2], [N7, N8, N9 | T3]) :-
     append([N8, N9], T3, TT3),
     unico_adjacente(TT1, TT2, TT3).
 unico_adjacente([_,_], [_,_], [_,_]).
+
+
+% Define uma regra para valores V pertencentes a regiao Region conforme a lista de regioes Rt.
+% Os valores pertencentes a regiao Region sao guardados em At.
+values_region(_, [], [], []).
+values_region(Region, [V|Vt], [R|Rt], [V|At]) :- R #= Region, values_region(Region, Vt, Rt, At).
+values_region(Region, [V|Vt], [R|Rt], At) :- R \= Region, values_region(Region, Vt, Rt, At).
 
 /*
 % Define se os numeros em uma linha sao distintos na sua regiao.

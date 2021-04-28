@@ -12,15 +12,18 @@ tabuleiro(1, [[_, _, _, _, 1],
               [6, 5, 5, 5, 5]]).
       
 % WIP
-suguru(Rows) :-
-    maplist(same_length(Rows), Rows),  
-    append(Rows, Vs),
+suguru(Values, Regions) :-
+    maplist(same_length(Values), Values),  
+    maplist(same_length(Regions), Regions),  
+    length(Values, L),
+    append(Values, Vs),
+    append(Regions, Rs),
+    Values ins 1..L,
     Rows = [As, Bs, Cs, Ds, Es],  % FIXME funcionará somente para 5x5
     append(Chunk1, [_,_], Rows),
     append([_|Chunk2], [_], Rows),
     append([_,_|Chunk3], [], Rows),
     maplist(unique_adjacency, Chunk1, Chunk2, Chunk3),
-    distintos_row(Vs).
     
 
 
@@ -50,23 +53,16 @@ values_region(Region, [V|Vt], [R|Rt], At) :- R \= Region, values_region(Region, 
 regions([], []).
 regions([R|Rt], [R|At]) :- \+ memberchk(R, Rt), regions(Rt, At).
 regions([R|Rt], At) :- memberchk(R, Rt), regions(Rt, At).
-/*
-% Define se os numeros em uma linha sao distintos na sua regiao.
-% ?- distintos_row([1-1, 1-2, 4-3, 5-2])
-% true .
-% ?- distintos_row([1-1, 1-2, 4-3, 1-1, 5-2])
-% false .
-distintos_row([N1-R1, N2-R2 | T]) :- 
-    R1 \== R2, 
-    append([N1-R1], T, TT1), 
-    append([N2-R2], T, TT2), 
-    distintos_row(TT1), 
-    distintos_row(TT2).
-distintos_row([N1-R, N2-R | T]) :- 
-    N1 \== N2, 
-    append([N1-R], T, TT1), 
-    append([N2-R], T, TT2), 
-    distintos_row(TT1), 
-    distintos_row(TT2).
-distintos_row([_-_]).
-*/
+
+% Define regra para dizer se o valor V esta presente na regiao R
+in_region(R, V, Regions, Values) :- values_region(R, Values, Regions, ValuesR), memberchk(V, ValuesR).
+
+% Define regra para o tamanho S da regiao R em Rt.
+length_region(_, [], 0).
+length_region(R, [R|Rt], S) :- length_region(R, Rt, S1), S is S1 + 1, !. 
+length_region(Region, [_|Rt], S) :- length_region(Region, Rt, S).
+
+
+% Define a regra do que eh uma regiao.
+region([], [], _, _).
+region([V|Vt], [R|Rt], Regions, Values) :- \+ in_region(R, V, Regions, Values), region(Vt, Rt, Regions, Values).

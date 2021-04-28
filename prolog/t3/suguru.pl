@@ -19,7 +19,7 @@ suguru(Rows) :-
     append(Chunk1, [_,_], Rows),
     append([_|Chunk2], [_], Rows),
     append([_,_|Chunk3], [], Rows),
-    maplist(unico_adjacente, Chunk1, Chunk2, Chunk3),
+    maplist(unique_adjacency, Chunk1, Chunk2, Chunk3),
     distintos_row(Vs).
     
 
@@ -28,7 +28,7 @@ suguru(Rows) :-
 % [[N1-_, N2-_, N3-_],
 %  [N4-_, N5-_, N6-_],
 %  [N7-_, N8-_, N9-_]]
-unico_adjacente([N1, N2, N3 | T1], [N4, N5, N6 | T2], [N7, N8, N9 | T3]) :-
+unique_adjacency([N1, N2, N3 | T1], [N4, N5, N6 | T2], [N7, N8, N9 | T3]) :-
     all_distinct([N1, N2, N4, N5]), % checa canto superior esquerdo
     all_distinct([N3, N2, N5, N6]), % checa canto superior direito
     all_distinct([N7, N4, N5, N8]), % checa canto inferior esquerdo
@@ -37,7 +37,7 @@ unico_adjacente([N1, N2, N3 | T1], [N4, N5, N6 | T2], [N7, N8, N9 | T3]) :-
     append([N5, N6], T2, TT2),
     append([N8, N9], T3, TT3),
     unico_adjacente(TT1, TT2, TT3).
-unico_adjacente([_,_], [_,_], [_,_]).
+unique_adjacency([_,_], [_,_], [_,_]).
 
 
 % Define uma regra para valores V pertencentes a regiao Region conforme a lista de regioes Rt.

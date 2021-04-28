@@ -29,7 +29,7 @@ suguru(Values, Regions) :-
     length(Values, L),
     append(Values, Vs),
     append(Regions, Rs),
-    Vs ins 1..L,
+    Vs ins 1..13,
     append(Chunk1, [_,_], Values),
     append([_|Chunk2], [_], Values),
     append([_,_|Chunk3], [], Values),
@@ -87,4 +87,4 @@ region(Regions, [V|Vt], [R|Rt]) :-  \+ in_region(R, V, Rt, Vt),
                                     region(Regions, Vt, Rt).
                                 */
                                 
-region(Values, Regions, R) :- values_region(R, Values, Regions, Result), all_different(Result).
+region(Values, Regions, R) :- values_region(R, Values, Regions, Result), all_different(Result), length_region(R, Regions, L), maplist(#>=(L), Result).

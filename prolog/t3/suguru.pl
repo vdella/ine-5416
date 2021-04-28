@@ -55,14 +55,20 @@ regions([R|Rt], [R|At]) :- \+ memberchk(R, Rt), regions(Rt, At).
 regions([R|Rt], At) :- memberchk(R, Rt), regions(Rt, At).
 
 % Define regra para dizer se o valor V esta presente na regiao R
-in_region(R, V, Regions, Values) :- values_region(R, Values, Regions, ValuesR), memberchk(V, ValuesR).
+in_region(R, V, Regions, Values) :- values_region(R, Values, Regions, ValuesR), memberchk(V, ValuesR), !.
 
 % Define regra para o tamanho S da regiao R em Rt.
 length_region(_, [], 0).
 length_region(R, [R|Rt], S) :- length_region(R, Rt, S1), S is S1 + 1, !. 
 length_region(Region, [_|Rt], S) :- length_region(Region, Rt, S).
 
+/*
+occurence(_, [], 0).
+occurence(N, [N|Nt], Sum) :- occurence(N, Nt, Sum1), Sum is Sum1 + 1.
+occurence(V, [N|Nt], Sum) :- occurence(N, Nt, Sum).
+*/
 
 % Define a regra do que eh uma regiao.
-region([], [], _, _).
-region([V|Vt], [R|Rt], Regions, Values) :- \+ in_region(R, V, Regions, Values), region(Vt, Rt, Regions, Values).
+% precisa definir que o valor V eh unico na regiao
+region([], [], _).
+region([V|Vt], [R|Rt], Regions) :- \+ in_region(R, V, Rt, Vt), length_region(R, Regions, L), V > 0, V =< L, region(Vt, Rt, Regions).

@@ -46,6 +46,10 @@ values_region(_, [], [], []).
 values_region(Region, [V|Vt], [R|Rt], [V|At]) :- R #= Region, values_region(Region, Vt, Rt, At).
 values_region(Region, [V|Vt], [R|Rt], At) :- R \= Region, values_region(Region, Vt, Rt, At).
 
+% Define regra que retorna em At a lista de regioes Rt unicas.
+regions([], []).
+regions([R|Rt], [R|At]) :- \+ memberchk(R, Rt), regions(Rt, At).
+regions([R|Rt], At) :- memberchk(R, Rt), regions(Rt, At).
 /*
 % Define se os numeros em uma linha sao distintos na sua regiao.
 % ?- distintos_row([1-1, 1-2, 4-3, 5-2])
